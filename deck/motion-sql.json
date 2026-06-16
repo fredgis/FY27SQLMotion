@@ -1,0 +1,70 @@
+{
+  "title": "FY27 SQL Motion - Two Paths to Azure SQL",
+  "output": "MotionSQL-Azure.pptx",
+  "footer": "Azure SQL  |  Migration via GSI (System Integrators)  \u2022  Adoption / Operate (ISV / SDC)  |  \u201CSQL in a Day\u201D",
+  "header": {
+    "tag": "SQL MOTION",
+    "title": "Two Paths to Azure SQL",
+    "subtitle": "Migration for System Integrators  \u2022  Adoption for ISVs  \u2014  enabled through \u201CSQL in a Day\u201D",
+    "badge": "2 MOTIONS"
+  },
+  "pathways": [
+    {
+      "tag": "MIGRATION / SI",
+      "audience": "System Integrators",
+      "accent": "0078D4",
+      "headline": [
+        { "t": "Migrate SQL workloads ", "bold": true },
+        { "t": "to Azure \u2014 delivered through " },
+        { "t": "GSIs", "bold": true, "accent": true }
+      ],
+      "approach": "Migration via GSI",
+      "kpi": "Migrate \u2014 number of opportunities (Nbr Opty)",
+      "chips": {
+        "label": "GSI partners",
+        "items": ["Capgemini", "Accenture / Avanade", "NTT Data", "TCS", "IBM (Nordcloud)"]
+      }
+    },
+    {
+      "tag": "ADOPTION / ISV",
+      "audience": "ISV / SDC",
+      "accent": "00B4A6",
+      "headline": [
+        { "t": "ISVs adopt " },
+        { "t": "a managed database service ", "bold": true, "accent": true },
+        { "t": "and operate on Azure SQL" }
+      ],
+      "approach": "Adoption / Operate",
+      "kpi": "Operate \u2014 % of ISVs that adopted a new service",
+      "goal": {
+        "label": "Goal",
+        "text": "Each ISV runs a new managed database service on Azure"
+      }
+    }
+  ],
+  "bottom": {
+    "work": {
+      "title": "THE WORK",
+      "bullets": [
+        "List all technical migration assets",
+        "List all prerequisites to accelerate migrations",
+        "Define the rationale \u2014 why migrate?",
+        { "text": "PG \u201Cnew born\u201D  \u2022  SQL Server \u201Cnew born\u201D", "highlight": true }
+      ]
+    },
+    "vehicle": {
+      "icon": "\u26A1",
+      "name": "SQL in a Day",
+      "subtitle": "Enablement vehicle",
+      "note": "Example: help CSPs build their own \u201CSQL in a Day\u201D"
+    },
+    "ask": {
+      "title": "THE ASK",
+      "bullets": [
+        "Funding",
+        "8 meetings \u2014 lead STU",
+        { "text": "1 sponsor per GSI", "highlight": true }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "pptxmotions",
+  "version": "1.0.0",
+  "description": "Turn a go-to-market motion into one polished PowerPoint slide from a JSON config.",
+  "main": "motion.js",
+  "bin": {
+    "pptxmotions": "motion.js"
+  },
+  "scripts": {
+    "example:sql": "node motion.js examples/motion-sql.json out-sql.pptx",
+    "example:fabric": "node motion.js examples/fabric-apps.json out-fabric.pptx"
+  },
+  "keywords": [
+    "powerpoint",
+    "pptx",
+    "pptxgenjs",
+    "slides",
+    "motion",
+    "go-to-market",
+    "copilot-skill"
+  ],
+  "author": "fredgis",
+  "license": "MIT",
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}

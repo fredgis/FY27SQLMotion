@@ -1,0 +1,70 @@
+{
+  "title": "Contoso Cloud Motion - Two Paths to Contoso Cloud (DEMO / fake data)",
+  "output": "demo-motion.pptx",
+  "footer": "Contoso Cloud  |  Migration via SI partners  \u2022  Adoption (ISV / SDC)  |  \u201CCloud in a Day\u201D  \u2014  fictional sample",
+  "header": {
+    "tag": "DEMO MOTION",
+    "title": "Two Paths to Contoso Cloud",
+    "subtitle": "Migration for System Integrators  \u2022  Adoption for ISVs  \u2014  sample data, not a real plan",
+    "badge": "SAMPLE"
+  },
+  "pathways": [
+    {
+      "tag": "MIGRATION / SI",
+      "audience": "System Integrators",
+      "accent": "0078D4",
+      "headline": [
+        { "t": "Migrate legacy workloads ", "bold": true },
+        { "t": "to Contoso Cloud \u2014 delivered through " },
+        { "t": "SI partners", "bold": true, "accent": true }
+      ],
+      "approach": "Migration via SI",
+      "kpi": "Migrate \u2014 number of opportunities created",
+      "chips": {
+        "label": "Partner ecosystem (fictional)",
+        "items": ["Globex", "Initech", "Umbrella Co", "Stark Solutions", "Wayne Consulting"]
+      }
+    },
+    {
+      "tag": "ADOPTION / ISV",
+      "audience": "ISV / SDC",
+      "accent": "00B4A6",
+      "headline": [
+        { "t": "ISVs adopt " },
+        { "t": "a new managed platform service ", "bold": true, "accent": true },
+        { "t": "and operate on Contoso Cloud" }
+      ],
+      "approach": "Adoption / Operate",
+      "kpi": "Operate \u2014 % of ISVs that shipped a new service",
+      "goal": {
+        "label": "Goal",
+        "text": "Each ISV runs a new managed service on Contoso Cloud"
+      }
+    }
+  ],
+  "bottom": {
+    "work": {
+      "title": "THE WORK",
+      "bullets": [
+        "List all technical migration assets",
+        "List all prerequisites to accelerate migrations",
+        "Define the rationale \u2014 why migrate?",
+        { "text": "Sample highlight line \u2014 fictional data", "highlight": true }
+      ]
+    },
+    "vehicle": {
+      "icon": "\u26A1",
+      "name": "Cloud in a Day",
+      "subtitle": "Enablement vehicle",
+      "note": "Example: help partners build their own \u201CCloud in a Day\u201D"
+    },
+    "ask": {
+      "title": "THE ASK",
+      "bullets": [
+        "Funding",
+        "8 meetings \u2014 lead by the sales team",
+        { "text": "1 sponsor per partner", "highlight": true }
+      ]
+    }
+  }
+}
