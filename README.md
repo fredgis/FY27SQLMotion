@@ -1,13 +1,8 @@
 # FY27 SQL Motion
 
-> **One business motion, one slide, one source of truth.**
-> A template repository for capturing a go-to-market **motion** — its strategy,
-> its KPIs, and its executive one-slide summary — in a form anyone on the team
-> can read, reuse, and regenerate.
-
-This repo is the **SQL motion** for FY27. It is also the **reference template**
-for spinning up new motion repos: the next motion (e.g. the Fabric apps motion)
-will live in its own repo with the exact same structure.
+This repo is the **SQL motion** for FY27. It follows the shared motion template:
+a README with the strategy, a one-slide executive summary, supporting docs, build
+scripts, and the bundled slide generator.
 
 ---
 
@@ -49,12 +44,29 @@ regenerate, and the slide stays consistent.
 
 ---
 
+## 🛠️ Regenerate the slide
+
+```bash
+# macOS / Linux
+./scripts/build.sh
+```
+
+```powershell
+# Windows
+./scripts/build.ps1
+```
+
+The scripts install the generator's dependencies, rebuild the `.pptx` from the
+config, and (if LibreOffice is available) refresh the PNG preview.
+
+---
+
 ## 🧭 Use this repo as a template for a new motion
 
 1. **Create a new repo** from this one (or copy its structure).
-2. **Edit the strategy** in this README — paths, KPIs, work, ask.
+2. **Edit the strategy** in this README and `docs/motion-brief.md`.
 3. **Edit `deck/motion-sql.json`** (rename it to your motion) with your content.
-4. **Regenerate the slide** (see below) and commit the `.pptx` + preview PNG.
+4. **Run `scripts/build.*`** and commit the `.pptx` + preview PNG.
 
 ```
 FY27SQLMotion/
@@ -63,6 +75,11 @@ FY27SQLMotion/
 │   ├── motion-sql.json           # slide content as data (edit this)
 │   ├── MotionSQL-Azure.pptx      # generated slide (commit it)
 │   └── preview/MotionSQL-Azure.png
+├── docs/
+│   └── motion-brief.md           # detailed narrative brief
+├── scripts/
+│   ├── build.sh                  # regenerate slide + preview (macOS/Linux)
+│   └── build.ps1                 # regenerate slide + preview (Windows)
 └── skill/pptxmotions/            # the generator (see collapsed section below)
 ```
 
