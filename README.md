@@ -44,6 +44,22 @@ regenerate, and the slide stays consistent.
 
 ---
 
+## 🎞️ The full motion deck
+
+[![FY27 EMEA EPS — Data Motion — SQL in a Day deck cover](docs/preview/sql-in-a-day-motion-deck-cover.png)](docs/FY27%20EMEA%20EPS%20-%20Data%20Motion%20-%20SQL%20in%20a%20Day.pptx)
+
+📥 **[FY27 EMEA EPS — Data Motion — SQL in a Day.pptx](docs/FY27%20EMEA%20EPS%20-%20Data%20Motion%20-%20SQL%20in%20a%20Day.pptx)** *(15 editable slides, click the cover above to download)*
+
+Where the one-slide summary is the elevator pitch, this **15-slide deck** is the full
+v-team / leadership story behind the motion. It opens with an **Executive Summary** and a
+**Motion at a Glance** view, then walks both go-to-market paths end to end — **Migration**
+through GSIs and **Adoption** through ISV / SDC — all enabled by the single hands-on
+vehicle, **"SQL in a Day"**. It closes with the KPI model, the execution roadmap, and **The Ask**.
+
+The condensed narrative is in [`docs/FY27-EPS-Data-Motion-SQL-in-a-Day.md`](docs/FY27-EPS-Data-Motion-SQL-in-a-Day.md).
+
+---
+
 ## 🛠️ Regenerate the slide
 
 ```bash
