@@ -10,15 +10,30 @@ Help the user choose the **best migration path** for a SQL Server environment by
 running a **short guided interview** and then producing a **grounded, deterministic
 recommendation** (target + method + downtime + blockers + cost + program).
 
-This skill encodes the knowledge base
+This skill is **sourced from the knowledge base**
 [`docs/sql-server-to-azure-migration.md`](https://github.com/fredgis/FY27SQLMotion/blob/main/docs/sql-server-to-azure-migration.md)
 (FY27 SQL Motion, "SQL in a Day"). It mirrors the **AI Migration Agent I/O contract** in §14 of that doc.
+
+## Source of truth (read this first)
+
+The **authoritative source** for every recommendation is the live document above. At the
+start of a session, **fetch it** and use it as the ground truth:
+
+- Raw URL: `https://raw.githubusercontent.com/fredgis/FY27SQLMotion/main/docs/sql-server-to-azure-migration.md`
+- Use whatever fetch capability is available (e.g. the `web_fetch` tool, or `curl`/`Invoke-WebRequest`
+  via a shell). Prefer the live doc so version gates, retirements and previews are always current.
+- **Fallback:** if the doc can't be fetched (offline / no network), use the bundled
+  `reference/decision-rules.md`, which is a faithful distillation of that same doc. Tell the
+  user you're using the offline fallback so they know it may lag the live source.
+- If the live doc and the bundled rules ever disagree, **the live doc wins** — and mention it.
 
 ## Core principles
 
 - **Interview first, recommend second.** Never guess the path before asking. Ask the
   questions below **one at a time** with the `ask_user` tool, multiple-choice where
   possible. Stop as soon as you have enough to decide; skip irrelevant branches.
+- **Ground every recommendation in the source doc** (live fetch, or the bundled distillation
+  as fallback) — never invent paths, tools or version gates not present in it.
 - **Ask in the user's language.** If the user writes in French, ask in French.
 - **Separate the three layers** (the #1 mistake): **target** (where the DB ends up),
   **control plane** (how you assess/orchestrate), **method** (the data vehicle).
@@ -36,16 +51,18 @@ This skill encodes the knowledge base
 
 ## Workflow
 
-1. **Frame it.** One sentence: "I'll ask ~8–10 quick questions, then give you a scored
+1. **Load the source.** Fetch the live knowledge-base doc (see *Source of truth* above);
+   fall back to bundled `reference/decision-rules.md` if offline.
+2. **Frame it.** One sentence: "I'll ask ~8–10 quick questions, then give you a scored
    migration path." If the user already volunteered answers (e.g. "SQL 2014, 2 TB, need
    minimal downtime, uses SQL Agent"), pre-fill those and only ask what's missing.
-2. **Interview** using the questionnaire below (`ask_user`, one question per call).
-3. **Score** using `reference/decision-rules.md` (Steps A→D). The rules are deterministic —
-   apply them, don't improvise.
-4. **Output** the recommendation card(s) using the template below. Always include the
+3. **Interview** using the questionnaire below (`ask_user`, one question per call).
+4. **Score** by applying the source doc's logic, organized as `reference/decision-rules.md`
+   Steps A→D. The rules are deterministic — apply them, don't improvise.
+5. **Output** the recommendation card(s) using the template below. Always include the
    **next assessment tool to run**, the **blockers + remediations**, and the **cost +
    program** lines.
-5. **Offer follow-ups:** a per-database table for several DBs, a runbook outline, or a
+6. **Offer follow-ups:** a per-database table for several DBs, a runbook outline, or a
    one-slide summary (hand off to the `pptxmotions` skill).
 
 ## The questionnaire (ask one at a time)
