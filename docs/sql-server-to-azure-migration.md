@@ -387,21 +387,24 @@ flowchart TB
 This document is the knowledge base behind the **FY27 EMEA EPS — Data Motion "SQL in a Day"**. Two notes:
 
 - **Storyline correction.** The deck line *"Azure Migrate, DMA, DMS, SSMA, Cloud Accelerate Factory"* must drop **DMA** (retired) → use *"Azure Migrate, SSMS 22 + Arc-based assessment, DMS, SSMA, Cloud Accelerate Factory"*. A **4th target pillar — SQL Server enabled by Azure Arc** — should appear alongside VM / MI / SQL DB.
-- **AI Migration Agent — I/O contract.** The afternoon agent scores the best path on the customer estate. Suggested schema so the agent is usable by both humans and automation:
+- **AI Migration Agent — I/O contract.** The afternoon agent scores the best path on the customer estate. Suggested flow so it's usable by both humans and automation:
 
-```text
-INPUT  (estate inventory)
-  servers[]:  { version, edition, os, cores, ram, dbCount, totalSizeGB,
-                features[FileStream|PolyBase|CrossDB|SQLAgent|LinkedServers|TDE],
-                ioBaselineMs, peakCPU, networkMbps, downtimeToleranceMin,
-                compliance[Gov|EU|sovereign], sourceCloud[onprem|AWS|GCP] }
-OUTPUT (recommendation)
-  perDatabase[]: { recommendedTarget,           // VM|AVS|MI|SQLDB|FabricSQLDB|ArcMI
-                   method,                       // MILink|LRS|BackupRestore|DAG|...
-                   downtimeClass,                // near-zero|minimal|offline
-                   blockers[], remediations[],
-                   estMonthlyCost, ahbEligible, esuPath }
-  programFit: { cloudAccelerateFactory, sqlInADay, azureAccelerate }
+```mermaid
+%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 55}, 'themeVariables': {'fontSize': '12px'}}}%%
+flowchart LR
+    IN["📥 INPUT · estate inventory<br/>per server: version · edition · OS · cores · RAM<br/>dbCount · totalSizeGB<br/>features: FileStream / PolyBase / CrossDB / SQLAgent / LinkedServers / TDE<br/>ioBaselineMs · peakCPU · networkMbps · downtimeToleranceMin<br/>compliance: Gov / EU / sovereign · sourceCloud: onprem / AWS / GCP"]
+    AGENT{{"🤖 AI Migration Agent<br/>scoring engine<br/>(this knowledge base +<br/>Microsoft migration corpus)"}}
+    OUT1["📤 OUTPUT · per database<br/>recommendedTarget: VM / AVS / MI / SQLDB / FabricSQLDB / ArcMI<br/>method: MILink / LRS / BackupRestore / DAG / …<br/>downtimeClass: near-zero / minimal / offline<br/>blockers · remediations<br/>estMonthlyCost · ahbEligible · esuPath"]
+    OUT2["🎯 programFit<br/>cloudAccelerateFactory · sqlInADay · azureAccelerate"]
+    IN --> AGENT
+    AGENT --> OUT1
+    AGENT --> OUT2
+    classDef in fill:#0F6CBD,stroke:#0A4C86,color:#fff;
+    classDef ag fill:#B14FD8,stroke:#7A2E97,color:#fff;
+    classDef out fill:#2E9E63,stroke:#1F6B43,color:#fff;
+    class IN in;
+    class AGENT ag;
+    class OUT1,OUT2 out;
 ```
 
 **Microsoft programs to attach:** **Cloud Accelerate Factory** (zero-cost delivery), **Azure Accelerate / FastTrack**, **AHB + ESU via Arc**.
