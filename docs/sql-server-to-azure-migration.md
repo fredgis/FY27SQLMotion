@@ -12,6 +12,7 @@
 > - **Azure Data Studio (ADS)** and its **Azure SQL Migration extension** are **RETIRED (28 February 2026)**.
 > - The new entry point is the **SSMS 22 Migration Component** (assess + migrate from SSMS), complemented by **SQL Server migration in Azure Arc** (portal, with Copilot) and **Azure Database Migration Service (DMS)**.
 > - **DMS *online* mode for Azure SQL Database** was discontinued with the 2024 tool consolidation; for **Managed Instance**, **MI Link** is now the recommended near‑zero‑downtime method.
+> - **Azure DMS *classic*** SQL Server scenarios are **RETIRED (15 March 2026)** — use the **modern** DMS (an Azure resource, via portal / PowerShell / CLI).
 
 ---
 
@@ -35,7 +36,7 @@ flowchart LR
         direction TB
         G1[IaaS: SQL Server on Azure VM · AVS]
         G2[PaaS: Azure SQL DB · SQL MI · SQL DB in Fabric]
-        G3[Containers: AKS / ARO / ACI · Arc-enabled SQL MI]
+        G3[Containers: AKS / ARO / ACI / ACA · Arc-enabled SQL MI]
         G4[Hybrid in-place: SQL Server enabled by Azure Arc]
     end
     subgraph CTL["🛠️ CONTROL PLANES — assess &amp; orchestrate"]
@@ -89,7 +90,7 @@ flowchart TD
         FAB[[SQL database in Fabric<br/>Preview]]
     end
     subgraph CON["Containers · Kubernetes"]
-        K8S[[SQL Server on AKS / ARO / ACI]]
+        K8S[[SQL Server on AKS / ARO / ACI / ACA]]
         ARCMI[[Arc-enabled SQL Managed Instance]]
     end
     subgraph HYB["Hybrid"]
@@ -115,7 +116,7 @@ flowchart TD
 | 3 | **Azure SQL Managed Instance** | PaaS | **Managed lift-and-shift**: keep instance objects (logins, SQL Agent, server triggers, cross-DB, linked servers), native vNet. Tiers GP / BC. | ~Near-full (instance) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/overview) |
 | 4 | **Azure SQL Database** | PaaS | Cloud-native app / microservice. Models: **single DB / elastic pool**; tiers **GP / BC / Hyperscale**; purchasing **vCore / DTU / serverless**. **Hyperscale** for > 4 TB or HTAP; **serverless** for intermittent workloads; **elastic pools** for consolidation. | Database surface (no instance-level) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/database/overview) |
 | 5 | **SQL database in Fabric** *(Preview for migration)* | PaaS | Fabric-native OLTP unified with OneLake. Migrate via **Fabric Migration Assistant** (DACPAC schema **≤ 20 MB**, **on-prem data gateway only**, no Private Link). **Not** an enterprise OLTP target yet. | Subset; preview | [Migration Assistant](https://learn.microsoft.com/en-us/fabric/database/sql/migration-assistant) |
-| 6 | **SQL Server in containers — AKS / ARO / ACI** | Container | Full control of the engine in a container (dev/test, edge, custom). Pod + **PersistentVolume**; HA via the Kubernetes scheduler. | High — SQL on Linux (**no FILESTREAM/FileTable, no SSRS/SSAS/SSIS**) | [SQL on Kubernetes](https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-kubernetes) |
+| 6 | **SQL Server in containers — AKS / ARO / ACI / ACA** | Container | Full control of the engine in a container (dev/test, edge, custom). Pod + **PersistentVolume**; HA via the Kubernetes scheduler. | High — SQL on Linux (**no FILESTREAM/FileTable, no SSRS/SSAS/SSIS**) | [SQL on Kubernetes](https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-kubernetes) |
 | 7 | **Azure Arc-enabled SQL Managed Instance** | Container (PaaS) | Managed SQL MI engine on **any Kubernetes** (AKS, ARO, EKS, GKE, OpenShift) via `kubectl`+CRD. Sovereignty / edge / multi-cloud. | ~Same as SQL MI | [create Arc SQL MI](https://learn.microsoft.com/en-us/azure/azure-arc/data/create-sql-managed-instance) |
 | 8 | **SQL Server enabled by Azure Arc** | Hybrid (control plane) | **Not a runtime target** — modernize *in place*: inventory, assessment, **best-practices assessment**, ESU, and a portal **Database migration** experience (Copilot-assisted) to MI/VM. | n/a | [Arc migration](https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/migration-overview) |
 
@@ -130,7 +131,7 @@ flowchart TD
 | [Azure Migrate](https://learn.microsoft.com/en-us/azure/migrate/how-to-create-azure-sql-assessment) | Discovery / assessment / sizing / business case at scale | GA (+ **Arc-based agentless discovery**, Preview) | Appliance (VMware/Hyper-V/Physical) **or** import-based **or** Arc-based. Right-sizes SQL DB / MI / VM. |
 | [SQL Server migration in Azure Arc](https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/migration-overview) | Portal-driven assess + migrate for any **Arc-enabled** SQL Server | GA; **MI** target GA, **VM** target Preview | **Copilot** recommends method (MI Link vs LRS); continuous assessment; supports sources from SQL Server 2012+. |
 | [SSMS 22 Migration Component](https://learn.microsoft.com/en-us/sql/ssms/sql-server-management-studio-ssms) | DBA-first entry point: assess + launch the right path from SSMS | GA (Windows-only) | Replaces DMA / ADS extension. Backup/restore, MI Link, DMS. **Azure SQL assessment capability expected ~Q3 CY2026.** |
-| [Azure DMS](https://learn.microsoft.com/en-us/azure/dms/dms-overview) | Managed migration orchestration | GA | **Online for SQL DB discontinued (2024)**; online to **MI** remains, but MI Link is preferred. |
+| [Azure DMS (modern)](https://learn.microsoft.com/en-us/azure/dms/dms-overview) | Managed migration orchestration (Azure resource · portal / PowerShell / CLI) | GA | Use the **modern** DMS — **DMS *classic* SQL scenarios retired 15 Mar 2026**. Online-to-SQL-DB discontinued (2024); online-to-**MI** remains, but **MI Link** preferred. |
 | [PowerShell `Az.DataMigration` / Azure CLI](https://learn.microsoft.com/en-us/powershell/module/az.datamigration/) | Automate DMS at scale (CI/CD) | GA | Often the only viable path beyond ~50 databases. |
 | [SSMA](https://learn.microsoft.com/en-us/sql/ssma/sql-server-migration-assistant) | **Heterogeneous** conversion (schema/code/data) | GA | Oracle / Sybase / DB2 / MySQL / Access → Azure SQL. **Not** for homogeneous SQL→SQL. |
 | [Database Experimentation Assistant (DEA)](https://learn.microsoft.com/en-us/previous-versions/sql/dea/database-experimentation-assistant-overview) | **Capture + replay** a production workload on the target to validate performance *before* cutover | GA | Not a data vehicle — a **risk-reduction** step that catches regressions (plan changes, compat-level effects) before you commit a target. |
@@ -161,7 +162,7 @@ Standardized columns (Microsoft Learn style): **Method · Min source · Target/m
 
 | Method | Min source | Downtime | Key constraints / notes |
 | --- | --- | --- | --- |
-| [Managed Instance link (MI Link)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/managed-instance-link-feature-overview) | **SQL 2016** (Win Server 2016+, Ent/Std/Dev) | **Near-zero (online)** | Distributed-AG based; **R/O readable target** during migration; **reverse failover to SQL 2022** (DR / Azure exit); up to **10 simultaneous DBs** (Arc ext 1.1.3348.364+); needs **port 5022** both ways. |
+| [Managed Instance link (MI Link)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/managed-instance-link-feature-overview) | **SQL 2016 and later** (incl. 2022, 2025; Win Server 2016+, Ent/Std/Dev) | **Near-zero (online)** | Distributed-AG based; **R/O readable target** during migration; **reverse failback to SQL 2022 / 2025** (DR / Azure exit); up to **10 simultaneous DBs** (Arc ext 1.1.3348.364+); needs **port 5022** both ways. |
 | [Log Replay Service (LRS)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate) | **SQL 2012** (all editions) | Offline (planned) | Full/diff/log → Azure Blob; **public endpoint**; unlimited DBs; **no R/O target**; **not** for Business Critical. |
 | [Native backup & restore (.bak)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/restore-sample-database-quickstart) | **SQL 2008** | Offline | Simplest; **migrate TDE certificate *before* restore** or it fails late; **master/msdb restore not supported** (script instance objects). |
 | [Transactional replication](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/replication-transactional-overview) | SQL 2012 | Online | Replicate all/part; article-type limits. |
@@ -195,10 +196,10 @@ Standardized columns (Microsoft Learn style): **Method · Min source · Target/m
 | Target | Method | Downtime | Notes |
 | --- | --- | --- | --- |
 | Arc-enabled SQL MI (AKS/ARO/…) | [Native backup/restore](https://learn.microsoft.com/en-us/azure/azure-arc/data/migrate-to-arc-enabled-sql-managed-instance), point-in-time restore | Offline | Requires Arc **data controller**; exposes a SQL MI endpoint → logical vehicles of [§5.2](#52-to-azure-sql-managed-instance-managed-lift-and-shift) apply. |
-| SQL Server container (mcr image) | [Backup/Restore via mounted volume](https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases), detach/attach, BACPAC, bcp, ADF | Offline / Online (repl.) | Persist on Azure Disk (AKS) / Azure Files (ACI); HA via scheduler. |
+| SQL Server container (mcr image) | [Backup/Restore via mounted volume](https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/back-up-and-restore-of-sql-server-databases), detach/attach, BACPAC, bcp, ADF | Offline / Online (repl.) | Persist on Azure Disk (AKS/ARO) / Azure Files (ACI/ACA); HA via scheduler. |
 
 > [!WARNING]
-> **Containers are not a fully-managed cloud database.** Plain `mssql` containers (AKS / ARO / ACI) put **patching, high availability and backups entirely on you** — best suited to **dev/test and edge** scenarios. **Arc-enabled SQL MI** automates engine **patching, backups and HA** through the Arc data controller, but **you still own the Kubernetes cluster, persistent storage and DR**. Neither is equivalent to the fully-managed **Azure SQL Database / Managed Instance** PaaS.
+> **Containers are not a fully-managed cloud database.** Plain `mssql` containers (AKS / ARO / ACI / ACA) put **patching, high availability and backups entirely on you** — best suited to **dev/test and edge** scenarios. **Arc-enabled SQL MI** automates engine **patching, backups and HA** through the Arc data controller, but **you still own the Kubernetes cluster, persistent storage and DR**. Neither is equivalent to the fully-managed **Azure SQL Database / Managed Instance** PaaS.
 
 ### 5.6 Offline & network transfer accelerators (large estates)
 
@@ -290,13 +291,16 @@ flowchart TB
 
 ## 9. Source-version & retirement reference
 
+**Tooling timeline:** DMA retired **Jul 2025** → ADS + SQL Migration extension retired **Feb 2026** → DMS *classic* SQL scenarios retired **Mar 2026** → SQL Data Sync retires **Sep 2027**.
+
 | Item | Status / requirement |
 | --- | --- |
 | DMA | **Retired 16 Jul 2025** → SSMS 22 / Arc / Azure Migrate |
 | Azure Data Studio + SQL Migration extension | **Retired 28 Feb 2026** → VS Code + MSSQL; SSMS 22 / DMS |
+| DMS *classic* — SQL Server scenarios | **Retired 15 Mar 2026** → modern DMS (portal / PowerShell / CLI) |
 | SQL Data Sync | **Retires 30 Sep 2027** → use ADF / transactional replication / AG |
 | DMS online → Azure SQL DB | **Discontinued 2024** (offline only) |
-| MI Link source | SQL Server **2016+**, Windows Server 2016+, Ent/Std/Dev |
+| MI Link source | SQL Server **2016 and later** (incl. 2022, 2025), Windows Server 2016+, Ent/Std/Dev |
 | LRS source | SQL Server **2012+**, all editions |
 | Native restore → MI | SQL Server **2008+** |
 | Transactional replication → MI | SQL Server **2012+** |
@@ -310,7 +314,7 @@ flowchart TB
 ## 10. Cross-cloud sources & reverse migration
 
 - **Cross-cloud sources** explicitly supported by DMS / LRS / MI Link / native restore: **AWS EC2**, **AWS RDS for SQL Server**, **GCP Compute Engine**, **GCP Cloud SQL for SQL Server**.
-- **Reverse / exit migration:** SQL DB → SQL Server via **BACPAC + scripts** (heavy); **MI → SQL Server 2022 via MI Link reverse failover** (trivial — a strategic portability argument).
+- **Reverse / exit migration:** SQL DB → SQL Server via **BACPAC + scripts** (heavy); **MI → SQL Server 2022 / 2025 via MI Link reverse failback** (trivial — a strategic portability argument).
 - **Neutral non-Microsoft targets** (for honest comparison): AWS RDS for SQL Server (+ AWS DMS), GCP Cloud SQL (+ GCP DMS), Tessell, OCI self-managed. Azure differentiators: **MI Link**, **Arc**, **Fabric Mirroring**.
 
 ---
