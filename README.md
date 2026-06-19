@@ -74,6 +74,46 @@ The condensed narrative is in [`docs/FY27-EPS-Data-Motion-SQL-in-a-Day.md`](docs
 
 ---
 
+## 🤖 Migration knowledge base & the `sql-migration-advisor` skill
+
+Behind the motion sits a **verified, source-backed knowledge base** —
+[`docs/sql-server-to-azure-migration.md`](docs/sql-server-to-azure-migration.md) — that
+inventories *every* way to migrate SQL Server to Azure: **8 target families** (SQL VM, AVS,
+SQL MI, SQL DB, Fabric SQL DB, containers, Arc-enabled SQL MI, Arc in-place), the migration
+**methods** per target (MI Link · LRS · backup/restore · DAG · DMS · BACPAC…), the 2025–2026
+**tooling reset** (DMA / ADS / DMS-classic retirements), downtime strategy, decision matrices,
+**commercial & funding levers** (AHB / ESU / PAYG · Azure Accelerate), and field pitfalls —
+all with Microsoft Learn links and colored Mermaid diagrams.
+
+On top of it ships **`sql-migration-advisor`**, a
+[GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/use-copilot-agents/use-copilot-cli)
+**skill** ([`skill/sql-migration-advisor/`](skill/sql-migration-advisor)) — the conversational
+front-end to that knowledge base. Ask Copilot *"migrate a SQL Server environment to Azure"*: it
+runs a short ~10-question interview, then returns a grounded recommendation — **target · method ·
+downtime class · blockers + remediations · cost levers · Microsoft program** — and never
+recommends retired tooling.
+
+![sql-migration-advisor recommendation card](docs/preview/sql-migration-advisor-skill.png)
+
+Install it once, then just ask in natural language:
+
+```powershell
+# Windows (PowerShell)
+git clone https://github.com/fredgis/FY27SQLMotion.git "$env:TEMP\FY27SQLMotion"
+Copy-Item -Recurse -Force "$env:TEMP\FY27SQLMotion\skill\sql-migration-advisor" "$env:USERPROFILE\.copilot\skills\"
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/fredgis/FY27SQLMotion.git /tmp/FY27SQLMotion
+cp -R /tmp/FY27SQLMotion/skill/sql-migration-advisor ~/.copilot/skills/
+```
+
+Restart Copilot CLI, run `/skills` to confirm **`sql-migration-advisor`** is listed, then ask
+your question. Full docs: [`skill/sql-migration-advisor/README.md`](skill/sql-migration-advisor/README.md).
+
+---
+
 ## 🛠️ Regenerate the slide
 
 ```bash
@@ -106,11 +146,13 @@ FY27SQLMotion/
 │   ├── MotionSQL-Azure.pptx      # generated slide (commit it)
 │   └── preview/MotionSQL-Azure.png
 ├── docs/
-│   └── motion-brief.md           # detailed narrative brief
+│   ├── motion-brief.md                    # detailed narrative brief
+│   └── sql-server-to-azure-migration.md   # SQL→Azure migration knowledge base
 ├── scripts/
 │   ├── build.sh                  # regenerate slide + preview (macOS/Linux)
 │   └── build.ps1                 # regenerate slide + preview (Windows)
-└── skill/pptxmotions/            # the generator (see collapsed section below)
+├── skill/pptxmotions/            # the slide generator (see collapsed section below)
+└── skill/sql-migration-advisor/  # Copilot CLI SQL→Azure migration advisor
 ```
 
 ---
