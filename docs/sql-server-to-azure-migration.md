@@ -4,7 +4,7 @@
 >
 > **Audience.** Partners, architects, and customer DBAs — usable in pre-sales and as the knowledge base behind the *SQL in a Day* **AI Migration Agent** ([§14](#14-fy27-sql-motion-context--ai-migration-agent)).
 >
-> **Verification.** Tool retirements, version requirements and target families were cross-checked against Microsoft Learn and product announcements (current as of **June 2026**). Links are gathered in [§15 Sources](#15-sources-microsoft-learn).
+> **Verification.** Tool retirements, version requirements and target families were cross-checked against Microsoft Learn and product announcements (current as of **June 2026**). Links are gathered in [§16 Sources](#16-sources-microsoft-learn).
 
 > [!IMPORTANT]
 > **2025–2026 tooling reset — read this first.**
@@ -21,7 +21,20 @@
 - **AI runs on data.** Modern, managed databases are the foundation; **SQL Server 2025** (GA **18 Nov 2025**) adds a **native `vector` type**, **native `json` type**, and Fabric Mirroring optimizations — making the engine AI-ready and improving migration (enhanced distributed AG).
 - **End-of-support pressure.** Out-of-support SQL Server/Windows versions push modernization; **Extended Security Updates (ESU)** are **free on Azure VMs**, and for on-prem are delivered **only via Azure Arc** (paid) — this changes the *stay vs migrate* math.
 - **Cost levers.** **Azure Hybrid Benefit (AHB)** applies to SQL DB (vCore), Managed Instance and VM (not to Fabric SQL DB) — up to ~85% savings when combined with reservations/ESU.
-- **Partner leverage.** Sharing a deal with a partner increases win rate and deal size; programs like **Cloud Accelerate Factory** and **SQL in a Day** industrialize delivery ([§14](#14-fy27-sql-motion-context--ai-migration-agent)).
+- **Partner leverage.** Sharing a deal with a partner increases win rate and deal size; programs like **Cloud Accelerate Factory** and **SQL in a Day** industrialize delivery ([§14](#14-fy27-sql-motion-context--ai-migration-agent)). Commercial & funding levers are detailed in [§15](#15-commercial-levers--funding-programs-fy27).
+- **Concrete forcing function.** **SQL Server 2016 reaches End of Support on 14 July 2026** — the #1 trigger in EMEA. "Stay" then means **paying ESU**; "migrate" makes **ESU free on Azure**.
+
+| Version | Extended End of Support | Status (Jun 2026) |
+| --- | --- | --- |
+| SQL Server 2012 | 12 Jul 2022 — ESU ended **Jul 2025** | ❌ Out of support |
+| SQL Server 2014 | 9 Jul 2024 — ESU ~Jul 2027 | ⚠️ Out of support (ESU window) |
+| **SQL Server 2016** | **14 Jul 2026** — ESU ~Jul 2029 | 🔴 **EOS imminent** |
+| SQL Server 2017 | 12 Oct 2027 | ✅ Extended support |
+| SQL Server 2019 | 8 Jan 2030 | ✅ |
+| SQL Server 2022 | 11 Jan 2033 | ✅ |
+| SQL Server 2025 | GA 18 Nov 2025 | ✅ Latest |
+
+> Windows Server often sits under SQL Server — **WS 2012/2012 R2** is out of support (ESU to Oct 2026), **WS 2016** EOS ~Jan 2027. Factor the OS into the move.
 
 ---
 
@@ -113,12 +126,12 @@ flowchart TD
 | --- | --- | --- | --- | --- | --- |
 | 1 | **SQL Server on Azure VM** | IaaS | Faithful lift & shift: OS / file-system control, exact version, FileStream/FileTable, PolyBase, cross-instance DTC, third-party agents. | Full | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/virtual-machines/overview) |
 | 2 | **Azure VMware Solution (AVS)** | IaaS | Zero-refactor data-center exit for existing VMware estates; keeps **FCI** and **Always On AG**; migrate with **VMware HCX / vMotion**. | Full | [AVS](https://learn.microsoft.com/en-us/azure/azure-vmware/introduction) |
-| 3 | **Azure SQL Managed Instance** | PaaS | **Managed lift-and-shift**: keep instance objects (logins, SQL Agent, server triggers, cross-DB, linked servers), native vNet. Tiers GP / BC. | ~Near-full (instance) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/overview) |
-| 4 | **Azure SQL Database** | PaaS | Cloud-native app / microservice. Models: **single DB / elastic pool**; tiers **GP / BC / Hyperscale**; purchasing **vCore / DTU / serverless**. **Hyperscale** for > 4 TB or HTAP; **serverless** for intermittent workloads; **elastic pools** for consolidation. | Database surface (no instance-level) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/database/overview) |
+| 3 | **Azure SQL Managed Instance** | PaaS | **Managed lift-and-shift**: keep instance objects (logins, SQL Agent, server triggers, cross-DB, linked servers), native vNet. Tiers GP / BC / **Next-gen GP** *(preview — Elastic SAN backend, up to 500 DBs, 128 vCores, 32 TB)*. **Free offer**: 1 instance / 12 months. ⚠️ **No Hyperscale on MI.** | ~Near-full (instance) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/overview) |
+| 4 | **Azure SQL Database** | PaaS | Cloud-native app / microservice. Models: **single DB / elastic pool**; tiers **GP / BC / Hyperscale**; purchasing **vCore / DTU / serverless**. **Hyperscale** scales to **128 TB** (large / HTAP); **serverless** for intermittent; **elastic pools** for consolidation. **Free offer**: 10 serverless DBs for the subscription lifetime. | Database surface (no instance-level) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/database/overview) |
 | 5 | **SQL database in Fabric** *(Preview for migration)* | PaaS | Fabric-native OLTP unified with OneLake. Migrate via **Fabric Migration Assistant** (DACPAC schema **≤ 20 MB**, **on-prem data gateway only**, no Private Link). **Not** an enterprise OLTP target yet. | Subset; preview | [Migration Assistant](https://learn.microsoft.com/en-us/fabric/database/sql/migration-assistant) |
 | 6 | **SQL Server in containers — AKS / ARO / ACI / ACA** | Container | Full control of the engine in a container (dev/test, edge, custom). Pod + **PersistentVolume**; HA via the Kubernetes scheduler. | High — SQL on Linux (**no FILESTREAM/FileTable, SSRS/SSAS/SSIS, ML Services; SQL Agent off by default**) | [SQL on Kubernetes](https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-kubernetes) |
 | 7 | **Azure Arc-enabled SQL Managed Instance** | Container (PaaS) | Managed SQL MI engine on **any Kubernetes** (AKS, ARO, EKS, GKE, OpenShift) via `kubectl`+CRD. Sovereignty / edge / multi-cloud. | ~Same as SQL MI | [create Arc SQL MI](https://learn.microsoft.com/en-us/azure/azure-arc/data/create-sql-managed-instance) |
-| 8 | **SQL Server enabled by Azure Arc** | Hybrid (control plane) | **Not a runtime target** — modernize *in place*: inventory, assessment, **best-practices assessment**, ESU, and a portal **Database migration** experience (Copilot-assisted) to MI/VM. | n/a | [Arc migration](https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/migration-overview) |
+| 8 | **SQL Server enabled by Azure Arc** | Hybrid (control plane) | **Not a runtime target** — the **bootstrap pillar**: connect on-prem SQL *without touching it* → **weekly continuous assessment**, blocker detection, **ESU**, **PAYG (OpEx) licensing**, governance, and a portal **Copilot-assisted Database migration** to MI/VM (MI Link / LRS). Sources SQL 2012+. | n/a | [Arc migration](https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/migration-overview) |
 
 > **Lift & shift is not VM-only.** Both **SQL Server on Azure VM** (IaaS) and **Azure SQL Managed Instance** (managed PaaS) are valid lift-and-shift targets. Since 2024, MI compatibility (SQL Agent, cross-DB queries, linked servers…) makes it the default *managed* lift-and-shift.
 
@@ -134,7 +147,7 @@ flowchart TD
 | [Azure DMS (modern)](https://learn.microsoft.com/en-us/azure/dms/dms-overview) | Managed migration orchestration (Azure resource · portal / PowerShell / CLI) | GA | Use the **modern** DMS — **DMS *classic* SQL scenarios retired 15 Mar 2026**. **Offline-only to Azure SQL DB**; online/minimal-downtime to **MI / SQL VM** (MI Link preferred for MI). |
 | [PowerShell `Az.DataMigration` / Azure CLI](https://learn.microsoft.com/en-us/powershell/module/az.datamigration/) | Automate DMS at scale (CI/CD) | GA | Often the only viable path beyond ~50 databases. |
 | [SSMA](https://learn.microsoft.com/en-us/sql/ssma/sql-server-migration-assistant) | **Heterogeneous** conversion (schema/code/data) | GA | Oracle / Sybase / DB2 / MySQL / Access → Azure SQL. **Not** for homogeneous SQL→SQL. |
-| [Database Experimentation Assistant (DEA)](https://learn.microsoft.com/en-us/previous-versions/sql/dea/database-experimentation-assistant-overview) | **Capture + replay** a production workload on the target to validate performance *before* cutover | **Legacy** (previous-versions docs) | Not a data vehicle — a **risk-reduction** step that catches regressions (plan changes, compat-level effects) before you commit a target. |
+| [Database Experimentation Assistant (DEA)](https://learn.microsoft.com/en-us/previous-versions/sql/dea/database-experimentation-assistant-overview) | **Capture + replay** a production workload on the target to validate performance *before* cutover | **Retired 15 Dec 2024** | Replaced by the **open-source SQLWorkload / WorkloadTools**. The *concept* (catch plan/compat regressions before cutover) remains valuable; the MS tool itself is retired. |
 
 > [!NOTE]
 > **Retired — do not use in new runbooks:** **DMA** (16 Jul 2025) and **Azure Data Studio + Azure SQL Migration extension** (28 Feb 2026). For cross-platform SQL dev, use **VS Code + MSSQL extension**; migration work continues via **SSMS 22 / Azure Arc / DMS / `Az.DataMigration` CLI**. **SQL Data Sync** retires **30 Sep 2027** — don't build new sync/migration on it (use ADF, transactional replication or AG).
@@ -163,7 +176,7 @@ Standardized columns (Microsoft Learn style): **Method · Min source · Target/m
 | Method | Min source | Downtime | Key constraints / notes |
 | --- | --- | --- | --- |
 | [Managed Instance link (MI Link)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/managed-instance-link-feature-overview) | **SQL 2016 and later** (incl. 2022, 2025; Win Server 2016+, Ent/Std/Dev) | **Near-zero (online)** | Distributed-AG based; **R/O readable target** during migration; **reverse failback to SQL 2022 / 2025** (DR / Azure exit); up to **10 simultaneous DBs** (Arc ext 1.1.3348.364+); needs **port 5022** both ways. |
-| [Log Replay Service (LRS)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate) | **SQL 2012** (all editions) | Offline (planned) | Full/diff/log → Azure Blob; **public endpoint**; unlimited DBs; **no R/O target**; GP & BC supported, but for large **Business Critical** migrations **prefer MI Link** (true online). |
+| [Log Replay Service (LRS)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate) | **SQL 2012** (all editions) | Offline (planned) | Full/diff/log → Azure Blob; **public endpoint**; **30-day max window**; FULL recovery + NORECOVERY (no reads); the **only managed path that applies differentials** to MI; GP & BC supported, but for large **Business Critical** migrations **prefer MI Link** (true online). |
 | [Native backup & restore (.bak)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/restore-sample-database-quickstart) | **SQL 2008** | Offline | Simplest; **migrate TDE certificate *before* restore** or it fails late; **master/msdb restore not supported** (script instance objects). |
 | [Transactional replication](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/replication-transactional-overview) | SQL 2012 | Online | Replicate all/part; article-type limits. |
 | [bcp / Smart Bulk Copy](https://learn.microsoft.com/en-us/samples/azure-samples/smartbulkcopy/smart-bulk-copy/) | any | Offline | High-speed data-only / partial (parallel copy). |
@@ -298,6 +311,7 @@ flowchart TB
 | DMA | **Retired 16 Jul 2025** → SSMS 22 / Arc / Azure Migrate |
 | Azure Data Studio + SQL Migration extension | **Retired 28 Feb 2026** → VS Code + MSSQL; SSMS 22 / DMS |
 | DMS *classic* — SQL Server scenarios | **Retired 15 Mar 2026** → modern DMS (portal / PowerShell / CLI) |
+| Database Experimentation Assistant (DEA) | **Retired 15 Dec 2024** → open-source SQLWorkload / WorkloadTools |
 | SQL Data Sync | **Retires 30 Sep 2027** → use ADF / transactional replication / AG |
 | DMS → Azure SQL DB | **Offline only** (online available for MI / SQL VM) |
 | MI Link source | SQL Server **2016 and later** (incl. 2022, 2025), Windows Server 2016+, Ent/Std/Dev |
@@ -379,6 +393,8 @@ flowchart TB
 - **Dependency mapping**: ~60% of migrations stumble on undocumented **linked servers** and **SQL Agent jobs** — run a dependency map (Azure Migrate or third-party) before committing a target.
 - **SLAs differ**: MI BC 99.99% · SQL DB BC 99.995% (zone-redundant) · SQL DB Hyperscale 99.99% · SQL VM depends on the AG. Align to the app, not a slogan.
 - **Security by design**: SQL DB has a public endpoint by default — recommend **Private Endpoint + Entra-only auth + disabled SQL auth** from day one.
+- **Fabric SQL DB ≠ Azure SQL DB**: not a drop-in replacement — fine-grained security (**RLS / OLS / dynamic masking**) **does not propagate to OneLake**; governance must be re-implemented in Fabric. For analytics on operational data, prefer **Mirroring** (keep OLTP on Azure SQL, mirror into Fabric, no ETL) over a hard cutover.
+- **Bootstrap via Arc first**: connect the estate to **Azure Arc *before* migrating** — free weekly continuous assessment, blocker detection, **ESU** and **PAYG (OpEx)** licensing while you plan, with zero workload change ([§3](#3-the-azure-targets-8-families) row 8).
 
 ---
 
@@ -407,11 +423,44 @@ flowchart LR
     class OUT1,OUT2 out;
 ```
 
-**Microsoft programs to attach:** **Cloud Accelerate Factory** (zero-cost delivery), **Azure Accelerate / FastTrack**, **AHB + ESU via Arc**.
+**Microsoft programs to attach:** **Cloud Accelerate Factory** (zero-cost delivery), **Azure Accelerate / FastTrack**, **AHB + ESU via Arc** — detailed in [§15](#15-commercial-levers--funding-programs-fy27).
 
 ---
 
-## 15. Sources (Microsoft Learn)
+## 15. Commercial levers & funding programs (FY27)
+
+> Two money levers to combine on every deal: **(A) Microsoft-funded engagement** money (assess / pilot / migrate) and **(B) commercial / licensing** levers that durably cut TCO.
+> ⚠️ **Amounts, ratios and program names are partner-confidential and drift each fiscal year (FY27 starts 1 Jul 2026) — re-validate live in Partner Center / the MCI guide before quoting.**
+
+### 15.1 Commercial / licensing levers (permanent TCO reducers)
+
+| Lever | What it saves | Mechanics |
+| --- | --- | --- |
+| **Azure Hybrid Benefit (AHB)** | 30%+ on Azure SQL DB / MI; compute-only on VM | License + **Software Assurance** reallocated to Azure; **1 Enterprise core = 4 GP vCores**; **180-day dual-use** during migration; portal toggle. ⚠️ **Not** for the DTU model or serverless. |
+| **Free ESU on Azure** | Removes on-prem ESU cost | **Azure VMs / AVS: ESU free & automatic**; **Azure SQL PaaS: ESU charges stop**; **on-prem / multicloud via Arc: ESU paid**; non-prod free when prod runs ESU via Arc. |
+| **PAYG licensing via Arc** | Turns the SQL license into OpEx | Billed only when SQL runs; **CALs included**; can sit inside a **MACC**. Requires active SA **or** PAYG enabled. |
+| **Free Azure SQL offers** | Zero-cost POC / pilots | **MI free 12 months**; **SQL DB free for the subscription lifetime** (serverless GP). |
+| **Reservations / Savings Plans** | 1- / 3-yr commitment discount | **Stacks with AHB**. ⚠️ Partner Earned Credit (15%) does **not** apply to reservations. |
+
+### 15.2 Microsoft-funded engagement programs
+
+| Program | Funds | Access |
+| --- | --- | --- |
+| **Azure Accelerate** (FY26 umbrella = *Azure Migrate & Modernize* + *Azure Innovate* + *Cloud Accelerate Factory*) | Assessments, POC, pilots, deployments, Azure credits, skilling | **Self-serve** — Partner Center nomination → POE → paid ≤ 45 days |
+| **Azure Accelerate for Databases** | SQL / data-estate modernization | Same workflow (database scenario) |
+| **Cloud Accelerate Factory** | **Zero-cost** Microsoft expert deployment | Via Azure Accelerate in Partner Center |
+| **FastTrack for Azure** | Free Microsoft engineering guidance (not cash) | Account team / program alias |
+| **ECIF** (End-Customer Investment Funds) | Assessments, POCs, migrations, training | **Field-led** via **PDM / AE** — not self-serve |
+| **Azure Frontier Offer** (ECIF + ACO, **dual-run offset**) | Services + dual-run during migration; competitive Oracle / legacy displacement | **Field-led** via PDM; typically ≥ 50% ACR from Fabric / first-party Databases / AI |
+
+### 15.3 Partner mechanics
+- **Attribution first** (funding prerequisite): link the customer via **PAL** (Partner Admin Link) or **DPOR** → unlocks the **15% Partner Earned Credit** on managed Azure consumption.
+- **Routes:** *Self-serve* (Partner Center) — Azure Accelerate, Databases, Cloud Accelerate Factory · *Field-led* (engage the **PDM early**) — ECIF, Azure Frontier Offer · *Customer self-serve* (Azure portal) — AHB, ESU, free offers, reservations.
+- **Typical sequence:** Azure Migrate discovery + TCO → nominate assess/pilot in **Azure Accelerate (Databases)** → if competitive or ≥ 50% data ACR, engage **PDM for the Azure Frontier Offer** → pilot on **free** SQL DB / MI → **CAF** for zero-cost deploy → POE → lock run-rate with **reservations**.
+
+---
+
+## 16. Sources (Microsoft Learn)
 
 **Overviews & taxonomy**
 - Database Migration hub — <https://learn.microsoft.com/en-us/data-migration/>
@@ -452,7 +501,11 @@ flowchart LR
 - Fabric Migration Assistant for SQL database (Preview) — <https://learn.microsoft.com/en-us/fabric/database/sql/migration-assistant>
 - Migrate to Fabric SQL DB via DACPAC — <https://learn.microsoft.com/en-us/fabric/database/sql/migrate-with-migration-assistant-using-dacpac>
 - Fabric Mirroring for SQL Server — <https://learn.microsoft.com/en-us/fabric/mirroring/sql-server>
+- Limitations for SQL database in Fabric — <https://learn.microsoft.com/en-us/fabric/database/sql/limitations>
+- Fabric — choose a data store (decision guide) — <https://learn.microsoft.com/en-us/fabric/fundamentals/decision-guide-data-store>
 - Azure VMware Solution — <https://learn.microsoft.com/en-us/azure/azure-vmware/introduction>
+- SQL MI — Next-gen General Purpose — <https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/service-tiers-next-gen-general-purpose-use>
+- Azure SQL DB Hyperscale — <https://learn.microsoft.com/en-us/azure/azure-sql/database/service-tier-hyperscale>
 
 **Data movement & VM-level**
 - Azure Data Box / Data Box Heavy — <https://learn.microsoft.com/en-us/azure/databox/data-box-overview>
@@ -463,9 +516,16 @@ flowchart LR
 - Azure-SSIS Integration Runtime — <https://learn.microsoft.com/en-us/azure/data-factory/create-azure-ssis-integration-runtime>
 - SQL Data Sync (retiring 30 Sep 2027) — <https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-data-sync-data-sql-server-sql-database?view=azuresql>
 
-**Licensing / programs**
-- Azure Hybrid Benefit — <https://azure.microsoft.com/pricing/hybrid-benefit/>
-- SQL Server ESU enabled by Azure Arc — <https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates>
+**Licensing / programs / lifecycle**
+- Azure Hybrid Benefit (Azure SQL) — <https://learn.microsoft.com/en-us/azure/azure-sql/azure-hybrid-benefit>
+- SQL Server ESU enabled by Azure Arc — <https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/extended-security-updates>
+- Move SQL Server license to PAYG (Arc) — <https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/manage-pay-as-you-go-transition>
+- SQL Server end-of-support / ESU — <https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-extended-security-updates>
+- SQL Server 2016 lifecycle — <https://learn.microsoft.com/en-us/lifecycle/products/sql-server-2016>
+- Azure SQL MI free offer — <https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/free-offer>
+- Azure SQL DB free offer — <https://learn.microsoft.com/en-us/azure/azure-sql/database/free-offer>
+- Azure Accelerate (partner programs) — <https://partner.microsoft.com/en-us/partnership/azure-offerings>
+- Tool consolidation / retirement (blog) — <https://www.microsoft.com/en-us/sql-server/blog/2024/09/12/modernize-your-database-with-the-consolidation-and-retirement-of-azure-database-migration-tools/>
 - Cloud Adoption Framework — migrate — <https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/migrate/>
 
 > *Links last verified: June 2026. Microsoft migration guides moved from `…/azure-sql/migration-guides/…` to `…/data-migration/sql-server/…` (redirects in place). Items marked **Preview** are subject to change.*
