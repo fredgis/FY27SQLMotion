@@ -139,29 +139,58 @@ Apply **`reference/decision-rules.md`** in order:
 - **Step C — Downtime class, blockers, remediations** (ports, TDE, logins, ancillary).
 - **Step D — Cost levers (AHB / ESU) + Microsoft program fit + assessment tool to run next.**
 
-## Output template (one card per database/profile)
+## Output format (render clean Markdown — NOT a code block)
 
-```
-## Recommended migration path — <DB or profile name>
+Render the recommendation as readable Markdown so it looks good on screen. **Do not**
+wrap the card in a ``` fence and **do not** use column-aligned colons — that looks dense.
+Use headings, a short verdict line, a compact table for the core decision, then tight
+bulleted sections and a blockquote for the single biggest risk. Use the user's language.
 
-🎯 Target            : <SQL VM | AVS | SQL MI | SQL DB (tier) | Fabric SQL DB | Arc SQL MI | Container | Arc in-place>
-🔁 Method            : <MI Link | LRS | Native backup/restore | Distributed/Always On AG | DMS (offline) |
-                        Transactional replication | BACPAC/SqlPackage | HCX/vMotion | Fabric Migration Assistant | ADF>
-⏱  Downtime class    : <near-zero | minimal | offline>
-🧭 Assess / orchestrate with : <SSMS 22 Migration Component | SQL migration in Azure Arc | Azure Migrate | modern DMS | Az.DataMigration>
+Follow this structure per database/profile:
 
-🚧 Blockers          : <e.g. port 5022 both ways; AD DS for DAG; TDE server cert; Windows logins>
-🛠  Remediations      : <ordered fixes — e.g. "1) migrate TDE cert first  2) open 5022  3) script logins">
-🔌 Ancillary         : <SSIS→Azure-SSIS IR; SSRS→Power BI paginated; SSAS→AAS; SQL Agent→native(MI)/Elastic Jobs(SQL DB)>
+---
 
-💰 Cost levers       : AHB <eligible?/path>; ESU <free on VM | via Arc (paid) on-prem>; sizing: Perfmon ≥7d + ~20% headroom
-🎁 Program fit       : <Cloud Accelerate Factory | SQL in a Day | Azure Accelerate / FastTrack>
-⚠️  Caveats          : <previews, size caps, SLA notes>
-🔗 Why               : <1–2 lines tying the choice to the answers + a Microsoft Learn link>
-```
+> **Verdict — `<DB or profile name>`**
+> **`<TARGET>`** via **`<METHOD>`** · downtime **`<class>`** · grounded in the FY27 SQL knowledge base.
 
-For multiple databases, render a compact table (DB · target · method · downtime · key blocker)
-and then expand only the non-obvious ones.
+A one-sentence plain-language summary of *why* this path (tie it to their answers).
+
+**📋 At a glance**
+
+| | Recommendation |
+| --- | --- |
+| 🎯 **Target** | `<SQL VM \| AVS \| SQL MI \| SQL DB (tier) \| Fabric SQL DB \| Arc SQL MI \| Container \| Arc in-place>` |
+| 🔁 **Method** | `<MI Link \| LRS \| Native backup/restore \| Distributed/Always On AG \| DMS offline \| Transactional replication \| BACPAC \| HCX/vMotion \| Fabric Migration Assistant \| ADF>` |
+| ⏱️ **Downtime** | `<near-zero \| minimal \| offline>` |
+| 🧭 **Assess / orchestrate** | `<SSMS 22 \| SQL migration in Azure Arc \| Azure Migrate \| modern DMS \| Az.DataMigration>` |
+
+**🚧 Blockers & fixes**
+- **`<blocker>`** → `<remediation>`
+- *(one line per blocker; order remediations 1→n when sequence matters, e.g. TDE cert first)*
+
+**🔌 Ancillary** — only the ones that apply: SSIS → Azure-SSIS IR · SSRS → Power BI paginated ·
+SSAS → AAS / Power BI · SQL Agent → native (MI) / Elastic Jobs (SQL DB) · linked servers → MI only.
+
+**💰 Cost & program**
+- **AHB** `<eligible? path>` · **ESU** `<free on VM \| via Arc (paid) on-prem>`
+- **Sizing:** Perfmon ≥ 7 days + ~20% headroom (never average CPU)
+- **Programs:** `<Cloud Accelerate Factory \| SQL in a Day \| Azure Accelerate / FastTrack>`
+
+> ⚠️ **Biggest risk:** `<the single most likely thing to derail this — ports / TDE cert order / network throughput / dependency-map gap>`. `<one line on how to defuse it.>`
+
+🔗 *`<Microsoft Learn link>`* · caveats: `<previews, size caps, SLA notes>`
+
+---
+
+**Formatting rules:**
+- A **bold verdict line first** so the answer is obvious at a glance.
+- **Emoji section headers** (🎯 🔁 ⏱️ 🧭 🚧 🔌 💰 ⚠️ 🔗) for scannability — one per section, not per line.
+- **Blank lines between sections**; never a wall of text.
+- **Omit empty sections** — if there are no ancillary services, drop the line entirely.
+- For an **estate (multiple DBs)**: lead with a short *"Estate strategy"* block, then one compact
+  table `DB · Target · Method · Downtime · Key blocker`, and expand only the non-obvious profiles
+  into full cards.
+- Keep it tight: prefer 1-line bullets over paragraphs.
 
 ## Guardrails
 

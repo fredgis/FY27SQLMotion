@@ -33,33 +33,36 @@ Use it to calibrate tone and the output card. **The numbers are illustrative.**
   Assess with **SSMS 22 Migration Component** (or Arc + Copilot). Program: **SQL in a Day** +
   **Cloud Accelerate Factory**.
 
-## Output card
+## Output card (new readable format)
 
-```
-## Recommended migration path — Finance-DB group (3 DBs)
+> **Verdict — `Finance-DB group (3 DBs)`**
+> **Azure SQL Managed Instance (GP)** via **Log Replay Service** · downtime **minimal** · grounded in the FY27 SQL knowledge base.
 
-🎯 Target            : Azure SQL Managed Instance — General Purpose
-🔁 Method            : Log Replay Service (LRS), full backup seeded over ExpressRoute + diff/log catch-up
-⏱  Downtime class    : minimal (short planned cutover)
-🧭 Assess / orchestrate with : SSMS 22 Migration Component (or SQL migration in Azure Arc, Copilot-assisted)
+Instance features (SQL Agent, cross-DB, linked servers) rule out SQL DB, and the
+fully-managed preference rules out VM — so SQL MI is the managed lift-and-shift; source
+SQL 2014 can't use MI Link (needs 2016+), so LRS gives a short planned cutover.
 
-🚧 Blockers          : TDE-encrypted DBs; SSIS packages; outbound 443/1433 to Azure Blob
-🛠  Remediations      : 1) migrate the TDE server certificate to MI FIRST  2) stand up Azure-SSIS IR
-                        (host SSISDB, migrate packages)  3) confirm 443/1433 egress to Storage/SQL
-🔌 Ancillary         : SSIS → Azure-SSIS Integration Runtime · SQL Agent jobs → native on MI ·
-                        Linked servers → re-create on MI post-cutover
+**📋 At a glance**
 
-💰 Cost levers       : AHB eligible (SQL MI, vCore) · ESU via Azure Arc on-prem during the project ·
-                        sizing from a Perfmon ≥7-day baseline + ~20% headroom (don't size on avg CPU)
-🎁 Program fit       : SQL in a Day + Cloud Accelerate Factory (zero-cost delivery)
-⚠️  Caveats          : Source is SQL 2014 → MI Link not available (needs 2016+); if you can upgrade the
-                        source to 2016+ first, MI Link unlocks near-zero downtime instead of LRS.
-🔗 Why               : Instance features (SQL Agent, cross-DB, linked servers) rule out SQL DB; managed
-                        preference rules out VM → SQL MI is the managed lift-and-shift.
-                        Learn: https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate
-```
+| | Recommendation |
+| --- | --- |
+| 🎯 **Target** | Azure SQL Managed Instance — General Purpose |
+| 🔁 **Method** | Log Replay Service (full backup seeded over ExpressRoute + diff/log catch-up) |
+| ⏱️ **Downtime** | minimal (short planned cutover) |
+| 🧭 **Assess / orchestrate** | SSMS 22 Migration Component (or SQL migration in Azure Arc, Copilot-assisted) |
 
-## Biggest single risk
-**TDE certificate order** — migrate the server-level cert to MI before any restore, or the
-restore fails ~80% in with no clear message. Validate performance with **DEA** capture+replay
-before final cutover.
+**🚧 Blockers & fixes**
+- **TDE-encrypted DBs** → migrate the TDE server certificate to MI **first** (else restore fails ~80% in)
+- **SSIS packages** → stand up Azure-SSIS Integration Runtime, host SSISDB, migrate packages
+- **Outbound 443/1433 to Azure Blob/SQL** → confirm egress is open
+
+**🔌 Ancillary** — SSIS → Azure-SSIS IR · SQL Agent jobs → native on MI · linked servers → re-create on MI post-cutover.
+
+**💰 Cost & program**
+- **AHB** eligible (SQL MI, vCore) · **ESU** via Azure Arc on-prem during the project
+- **Sizing:** Perfmon ≥ 7 days + ~20% headroom (never average CPU)
+- **Programs:** SQL in a Day + Cloud Accelerate Factory (zero-cost delivery)
+
+> ⚠️ **Biggest risk:** TDE certificate order — migrate the server-level cert to MI *before* any restore, or the restore fails ~80% in with no clear message. Validate with **DEA** capture+replay before cutover.
+
+🔗 *https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate* · caveat: if you can upgrade the source to 2016+ first, **MI Link** unlocks near-zero downtime instead of LRS.
