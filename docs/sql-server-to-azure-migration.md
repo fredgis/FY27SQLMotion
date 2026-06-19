@@ -115,7 +115,7 @@ flowchart TD
 | 3 | **Azure SQL Managed Instance** | PaaS | **Managed lift-and-shift**: keep instance objects (logins, SQL Agent, server triggers, cross-DB, linked servers), native vNet. Tiers GP / BC. | ~Near-full (instance) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/managed-instance/overview) |
 | 4 | **Azure SQL Database** | PaaS | Cloud-native app / microservice. Models: **single DB / elastic pool**; tiers **GP / BC / Hyperscale**; purchasing **vCore / DTU / serverless**. **Hyperscale** for > 4 TB or HTAP; **serverless** for intermittent workloads; **elastic pools** for consolidation. | Database surface (no instance-level) | [overview](https://learn.microsoft.com/en-us/data-migration/sql-server/database/overview) |
 | 5 | **SQL database in Fabric** *(Preview for migration)* | PaaS | Fabric-native OLTP unified with OneLake. Migrate via **Fabric Migration Assistant** (DACPAC schema **≤ 20 MB**, **on-prem data gateway only**, no Private Link). **Not** an enterprise OLTP target yet. | Subset; preview | [Migration Assistant](https://learn.microsoft.com/en-us/fabric/database/sql/migration-assistant) |
-| 6 | **SQL Server in containers — AKS / ARO / ACI** | Container | Full control of the engine in a container (dev/test, edge, custom). Pod + **PersistentVolume**; HA via the Kubernetes scheduler. | Full (SQL on Linux) | [SQL on Kubernetes](https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-kubernetes) |
+| 6 | **SQL Server in containers — AKS / ARO / ACI** | Container | Full control of the engine in a container (dev/test, edge, custom). Pod + **PersistentVolume**; HA via the Kubernetes scheduler. | High — SQL on Linux (**no FILESTREAM/FileTable, no SSRS/SSAS/SSIS**) | [SQL on Kubernetes](https://learn.microsoft.com/en-us/sql/linux/quickstart-sql-server-containers-kubernetes) |
 | 7 | **Azure Arc-enabled SQL Managed Instance** | Container (PaaS) | Managed SQL MI engine on **any Kubernetes** (AKS, ARO, EKS, GKE, OpenShift) via `kubectl`+CRD. Sovereignty / edge / multi-cloud. | ~Same as SQL MI | [create Arc SQL MI](https://learn.microsoft.com/en-us/azure/azure-arc/data/create-sql-managed-instance) |
 | 8 | **SQL Server enabled by Azure Arc** | Hybrid (control plane) | **Not a runtime target** — modernize *in place*: inventory, assessment, **best-practices assessment**, ESU, and a portal **Database migration** experience (Copilot-assisted) to MI/VM. | n/a | [Arc migration](https://learn.microsoft.com/en-us/sql/sql-server/azure-arc/migration-overview) |
 
@@ -163,7 +163,7 @@ Standardized columns (Microsoft Learn style): **Method · Min source · Target/m
 | --- | --- | --- | --- |
 | [Managed Instance link (MI Link)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/managed-instance-link-feature-overview) | **SQL 2016** (Win Server 2016+, Ent/Std/Dev) | **Near-zero (online)** | Distributed-AG based; **R/O readable target** during migration; **reverse failover to SQL 2022** (DR / Azure exit); up to **10 simultaneous DBs** (Arc ext 1.1.3348.364+); needs **port 5022** both ways. |
 | [Log Replay Service (LRS)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/log-replay-service-migrate) | **SQL 2012** (all editions) | Offline (planned) | Full/diff/log → Azure Blob; **public endpoint**; unlimited DBs; **no R/O target**; **not** for Business Critical. |
-| [Native backup & restore (.bak)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/restore-sample-database-quickstart) | **SQL 2005** | Offline | Simplest; **migrate TDE certificate *before* restore** or it fails late; **master/msdb restore not supported** (script instance objects). |
+| [Native backup & restore (.bak)](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/restore-sample-database-quickstart) | **SQL 2008** | Offline | Simplest; **migrate TDE certificate *before* restore** or it fails late; **master/msdb restore not supported** (script instance objects). |
 | [Transactional replication](https://learn.microsoft.com/en-us/azure/azure-sql/managed-instance/replication-transactional-overview) | SQL 2012 | Online | Replicate all/part; article-type limits. |
 | [bcp / Smart Bulk Copy](https://learn.microsoft.com/en-us/samples/azure-samples/smartbulkcopy/smart-bulk-copy/) | any | Offline | High-speed data-only / partial (parallel copy). |
 | [BACPAC / SqlPackage](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-import) | any | Offline | Smaller DBs / simple. |
@@ -298,7 +298,7 @@ flowchart TB
 | DMS online → Azure SQL DB | **Discontinued 2024** (offline only) |
 | MI Link source | SQL Server **2016+**, Windows Server 2016+, Ent/Std/Dev |
 | LRS source | SQL Server **2012+**, all editions |
-| Native restore → MI | SQL Server **2005+** |
+| Native restore → MI | SQL Server **2008+** |
 | Transactional replication → MI | SQL Server **2012+** |
 | Transactional replication → SQL DB | SQL Server **2016–2019 only** |
 | Backup-to-URL size | **12.8 TB** (2016+) / 1 TB |
@@ -336,7 +336,7 @@ flowchart TB
 | --- | :---: | :---: | :---: | :---: | :---: | :---: |
 | OS access required | ✅ | ✅ | ❌ | ❌ | ❌ | partial |
 | Cross-DB / DTC transactions | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-| FILESTREAM / FileTable | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
+| FILESTREAM / FileTable | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | PolyBase | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Service Broker | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
 | SQL CLR / linked servers | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
