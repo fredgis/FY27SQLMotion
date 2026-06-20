@@ -127,8 +127,9 @@ What's inside (≈28 pages, dated **June 2026**):
 
 - A branded cover + table of contents, then the full **targets / control planes / methods**
   taxonomy with colored Mermaid decision diagrams.
-- **Colour-coded matrices** (green = supported · red = N/A · grey = indirect) in landscape so the
-  *method × target* and *decision-criteria* grids are scannable at a glance.
+- **Colour-coded tables** (blue headers · green = supported · red = N/A · grey = indirect) with
+  **content-sized columns** (text-heavy columns stay wide), so the *method × target* and
+  *decision-criteria* grids are scannable at a glance.
 - Per-target **method tables** (min source version · downtime · constraints), the 2025–2026
   **tooling reset**, downtime strategy, field pitfalls, third-party options, and the
   **commercial & funding levers** (AHB / ESU / PAYG · Azure Accelerate).
