@@ -114,6 +114,32 @@ your question. Full docs: [`skill/sql-migration-advisor/README.md`](skill/sql-mi
 
 ---
 
+## 📄 The knowledge base as a PDF
+
+The same knowledge base ships as a polished, branded **PDF** —
+[`docs/sql-server-to-azure-migration.pdf`](docs/sql-server-to-azure-migration.pdf) — ready to
+hand to a partner or attach to a deal. It's generated reproducibly from the Markdown (pandoc +
+xelatex, Mermaid diagrams rendered inline) in the shared *fabric-foundry-kb* house style.
+
+[![SQL → Azure migration knowledge base — PDF preview](docs/preview/sql-migration-advisor-pdf-preview.png)](docs/sql-server-to-azure-migration.pdf)
+
+What's inside (≈28 pages, dated **June 2026**):
+
+- A branded cover + table of contents, then the full **targets / control planes / methods**
+  taxonomy with colored Mermaid decision diagrams.
+- **Colour-coded matrices** (green = supported · red = N/A · grey = indirect) in landscape so the
+  *method × target* and *decision-criteria* grids are scannable at a glance.
+- Per-target **method tables** (min source version · downtime · constraints), the 2025–2026
+  **tooling reset**, downtime strategy, field pitfalls, third-party options, and the
+  **commercial & funding levers** (AHB / ESU / PAYG · Azure Accelerate).
+- A closing **appendix** showing how to drive the `sql-migration-advisor` skill, with an example
+  recommendation card.
+
+Regenerate it with the [md2pdf](https://github.com/fredgis/fabric-foundry-kb) toolchain
+(pandoc + xelatex + mermaid-cli) from `docs/sql-server-to-azure-migration.md`.
+
+---
+
 ## 🛠️ Regenerate the slide
 
 ```bash
