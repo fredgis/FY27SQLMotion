@@ -76,8 +76,7 @@ The condensed narrative is in [`docs/FY27-EPS-Data-Motion-SQL-in-a-Day.md`](docs
 
 ## 🤖 Migration knowledge base & the `sql-migration-advisor` skill
 
-Behind the motion sits a **verified, source-backed knowledge base** —
-[`docs/sql-server-to-azure-migration.md`](docs/sql-server-to-azure-migration.md) — that
+Behind the motion sits a **verified, source-backed knowledge base** that
 inventories *every* way to migrate SQL Server to Azure: **8 target families** (SQL VM, AVS,
 SQL MI, SQL DB, Fabric SQL DB, containers, Arc-enabled SQL MI, Arc in-place), the migration
 **methods** per target (MI Link · LRS · backup/restore · DAG · DMS · BACPAC…), the 2025–2026
@@ -87,43 +86,44 @@ all with Microsoft Learn links and colored Mermaid diagrams.
 
 On top of it ships **`sql-migration-advisor`**, a
 [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/use-copilot-agents/use-copilot-cli)
-**skill** ([`skill/sql-migration-advisor/`](skill/sql-migration-advisor)) — the conversational
+**skill** — the conversational
 front-end to that knowledge base. Ask Copilot *"migrate a SQL Server environment to Azure"*: it
 runs a short ~10-question interview, then returns a grounded recommendation — **target · method ·
 downtime class · blockers + remediations · cost levers · Microsoft program** — and never
 recommends retired tooling.
 
-![sql-migration-advisor recommendation card](docs/preview/sql-migration-advisor-skill.png)
+> 📦 **Now in its own repo.** The knowledge base, the skill and its PDF live in a dedicated
+> repository — **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-migration-advisor)**.
+
+[![sql-migration-advisor recommendation card](https://raw.githubusercontent.com/fredgis/sql-migration-advisor/main/docs/preview/sql-migration-advisor-skill.png)](https://github.com/fredgis/sql-migration-advisor)
 
 Install it once, then just ask in natural language:
 
 ```powershell
 # Windows (PowerShell)
-git clone https://github.com/fredgis/FY27SQLMotion.git "$env:TEMP\FY27SQLMotion"
-Copy-Item -Recurse -Force "$env:TEMP\FY27SQLMotion\skill\sql-migration-advisor" "$env:USERPROFILE\.copilot\skills\"
+git clone https://github.com/fredgis/sql-migration-advisor.git "$env:USERPROFILE\.copilot\skills\sql-migration-advisor"
 ```
 
 ```bash
 # macOS / Linux
-git clone https://github.com/fredgis/FY27SQLMotion.git /tmp/FY27SQLMotion
-cp -R /tmp/FY27SQLMotion/skill/sql-migration-advisor ~/.copilot/skills/
+git clone https://github.com/fredgis/sql-migration-advisor.git ~/.copilot/skills/sql-migration-advisor
 ```
 
 Restart Copilot CLI, run `/skills` to confirm **`sql-migration-advisor`** is listed, then ask
-your question. Full docs: [`skill/sql-migration-advisor/README.md`](skill/sql-migration-advisor/README.md).
+your question. Full docs: **[fredgis/sql-migration-advisor](https://github.com/fredgis/sql-migration-advisor)**.
 
 ---
 
 ## 📄 The knowledge base as a PDF
 
-The same knowledge base ships as a polished, branded **PDF** —
-[`docs/sql-server-to-azure-migration.pdf`](docs/sql-server-to-azure-migration.pdf) — ready to
-hand to a partner or attach to a deal. It's generated reproducibly from the Markdown (pandoc +
-xelatex, Mermaid diagrams rendered inline) in the shared *fabric-foundry-kb* house style.
+The same knowledge base ships as a polished, branded **PDF** — ready to hand to a partner or
+attach to a deal. It's generated reproducibly from the Markdown (pandoc + xelatex, Mermaid
+diagrams rendered inline) in the shared *fabric-foundry-kb* house style, and lives alongside
+the skill in **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-migration-advisor/blob/main/docs/sql-server-to-azure-migration.pdf)**.
 
-[![SQL → Azure migration knowledge base — PDF preview](docs/preview/sql-migration-advisor-pdf-preview.png)](docs/sql-server-to-azure-migration.pdf)
+[![SQL → Azure migration knowledge base — PDF preview](https://raw.githubusercontent.com/fredgis/sql-migration-advisor/main/docs/preview/sql-migration-advisor-pdf-preview.png)](https://github.com/fredgis/sql-migration-advisor/blob/main/docs/sql-server-to-azure-migration.pdf)
 
-What's inside (≈28 pages, dated **June 2026**):
+What's inside (19 pages, **v1.1 · July 2026**):
 
 - A branded cover + table of contents, then the full **targets / control planes / methods**
   taxonomy with colored Mermaid decision diagrams.
@@ -137,7 +137,7 @@ What's inside (≈28 pages, dated **June 2026**):
   recommendation card.
 
 Regenerate it with the [md2pdf](https://github.com/fredgis/fabric-foundry-kb) toolchain
-(pandoc + xelatex + mermaid-cli) from `docs/sql-server-to-azure-migration.md`.
+(pandoc + xelatex + mermaid-cli) from the knowledge-base Markdown in that repo.
 
 ---
 
@@ -173,13 +173,11 @@ FY27SQLMotion/
 │   ├── MotionSQL-Azure.pptx      # generated slide (commit it)
 │   └── preview/MotionSQL-Azure.png
 ├── docs/
-│   ├── motion-brief.md                    # detailed narrative brief
-│   └── sql-server-to-azure-migration.md   # SQL→Azure migration knowledge base
+│   └── motion-brief.md                    # detailed narrative brief
 ├── scripts/
 │   ├── build.sh                  # regenerate slide + preview (macOS/Linux)
 │   └── build.ps1                 # regenerate slide + preview (Windows)
-├── skill/pptxmotions/            # the slide generator (see collapsed section below)
-└── skill/sql-migration-advisor/  # Copilot CLI SQL→Azure migration advisor
+└── skill/pptxmotions/            # the slide generator (see collapsed section below)
 ```
 
 ---

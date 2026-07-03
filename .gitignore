@@ -1,4 +1,3 @@
 node_modules/
 *.pdf
-!docs/sql-server-to-azure-migration.pdf
 package-lock.json
