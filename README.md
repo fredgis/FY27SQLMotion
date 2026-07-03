@@ -123,7 +123,7 @@ the skill in **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-
 
 [![SQL → Azure migration knowledge base — PDF preview](https://raw.githubusercontent.com/fredgis/sql-migration-advisor/main/docs/preview/sql-migration-advisor-pdf-preview.png)](https://github.com/fredgis/sql-migration-advisor/blob/main/docs/sql-server-to-azure-migration.pdf)
 
-What's inside (~18 pages, **v1.1 · July 2026**):
+What's inside (~18 pages, **v1.2 · July 2026**):
 
 - A branded cover + table of contents, then the full **targets / control planes / methods**
   taxonomy with colored Mermaid decision diagrams.
