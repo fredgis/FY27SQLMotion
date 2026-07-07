@@ -92,6 +92,21 @@ runs a short ~10-question interview, then returns a grounded recommendation — 
 downtime class · blockers + remediations · cost levers · Microsoft program** — and never
 recommends retired tooling.
 
+**The ~10-question interview** — asked one at a time, multiple-choice, in the user's language — covers:
+
+- **Scope** — single database, a few (2–10), or a large estate (10+ servers/DBs)
+- **Source location** — on-prem, AWS EC2 / RDS for SQL Server, GCP Compute Engine / Cloud SQL
+- **Source version** — SQL Server 2008 → 2025 (drives the hard version gates for each method)
+- **Primary driver** — end-of-support / ESU, cost, app modernization, data-center exit, analytics, or sovereignty
+- **Management model** — fully-managed PaaS, OS / engine control, or Kubernetes / edge / multi-cloud
+- **Feature dependencies** — FILESTREAM, PolyBase, cross-DB / DTC, SQL CLR, linked servers, SQL Agent, Service Broker
+- **Largest database size** — < 150 GB, 150 GB – 4 TB, or > 4 TB
+- **Downtime tolerance** — near-zero, minimal, or offline (planned window)
+- **Network & ports** — ExpressRoute / limited WAN / multi-TB, and whether 5022 / 1433 / 443 can open
+- **Compliance / sovereignty** — standard commercial, EU data boundary, government / sovereign, or edge / air-gapped
+- **Ancillary services** — SSIS, SSRS, SSAS, TDE-encrypted DBs, or many SQL Agent jobs
+- *(optional)* **Workload profile** — legacy ERP, multi-tenant SaaS, microservice, BI / analytics, or general OLTP — to break ties
+
 > 📦 **Now in its own repo.** The knowledge base, the skill and its PDF live in a dedicated
 > repository — **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-migration-advisor)**.
 
