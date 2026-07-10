@@ -211,10 +211,13 @@ Now you are the field engineer who owns the migration. Every `/squad` request yo
 ### 2.1 Initialize the squad
 
 ```text
-/squad profile=azure request="Set up the squad for a SQL Server to Azure migration project. Read ./knowledge-docs and ./source-env for context before proposing the cast."
+/squad profile=azure request="Initialize the squad for a SQL Server to Azure migration project and propose the azure-profile cast. Only set up the roster; do not read the migration inventory or start the assessment yet, that is the next step."
 ```
 
-The coordinator inspects the repository read-only, proposes the `azure` profile, and, on your confirmation, hands the roster to the **Squad Scribe** to seed `.copilot-tracking/squad/`. Watch the cast it names: `researcher`, `lead`, `developer`, `tester` (the methodology spine), plus `azure-architect`, `iac-author`, `deployer`, `asbuilt-author`, `azure-diagnose`, `architect`, `cost-manager`, `security`, and `modernizer`, the role that owns SQL migration advisory.
+The coordinator inspects the repository structure read-only, proposes the `azure` profile, and, on your confirmation, hands the roster to the **Squad Scribe** to seed `.copilot-tracking/squad/`. It stops there, it does not start the migration analysis. Watch the cast it names: `researcher`, `lead`, `developer`, `tester` (the methodology spine), plus `azure-architect`, `iac-author`, `deployer`, `asbuilt-author`, `azure-diagnose`, `architect`, `cost-manager`, `security`, and `modernizer`, the role that owns SQL migration advisory.
+
+> [!NOTE]
+> Keep this step to setup only. If you tell the coordinator to read `knowledge-docs/` or `source-env/sql` here, it picks up the whole migration context and tends to jump straight to proposing a target, front-running the advisor's interview in 2.2. Let the advisor gather the facts itself in the next step.
 
 ### 2.2 State the problem in the FDE's words
 
