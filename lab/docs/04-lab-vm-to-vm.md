@@ -77,13 +77,13 @@ flowchart LR
 You need, on your machine:
 
 * Visual Studio Code with GitHub Copilot and Copilot Chat, agent mode enabled.
-* The APM CLI on your path (it installs the squad).
+* The **APM CLI** ([microsoft/apm](https://github.com/microsoft/apm), open source), which installs the squad. Install it with `irm https://aka.ms/apm-windows | iex` on Windows, or `curl -sSL https://aka.ms/apm-unix | sh` on macOS/Linux.
 * The Azure CLI (`az`) with Bicep support, and `az login` completed.
 * PowerShell 7 or later (the source deploy and install scripts require it).
 * Owner or Contributor on an Azure subscription you are willing to spend a small amount on.
 
 > [!IMPORTANT]
-> **Run this repository from a local, non-synced path** such as `C:\labs\FY27SQLMotion`. Do not keep it inside OneDrive, Dropbox, or any file-sync folder: `apm install` writes hundreds of skill files under `.agents/`, and a sync client locks them mid-write, so the install fails with `WinError 5 (access denied)`. A plain local path avoids this completely.
+> Clone and run this lab from a plain local path such as `C:\labs` (the clone command below uses `C:\labs\FY27SQLMotion`), not a file-sync folder like OneDrive or Dropbox, which can lock files while `apm install` writes.
 
 **Everything this lab needs is in this repository**, so it runs standalone:
 

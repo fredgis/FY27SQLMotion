@@ -14,14 +14,11 @@ Module 0 through Module 7.
 
 ## Prerequisites (quick view)
 
-* Windows with **PowerShell 7+**, **VS Code** + **GitHub Copilot** (agent mode enabled), **Git**, and the **APM CLI**.
+* Windows with **PowerShell 7+**, **VS Code** + **GitHub Copilot** (agent mode enabled), **Git**, and the **APM CLI** ([microsoft/apm](https://github.com/microsoft/apm), open source — install it with `irm https://aka.ms/apm-windows | iex`).
 * **Azure CLI** (`az`) with Bicep support, `az login` completed, and Owner or Contributor on a subscription.
 
 > [!IMPORTANT]
-> **Run this lab from a local, non-synced path** (for example `C:\labs\...`). Do
-> not run it from inside OneDrive, Dropbox, or any file-sync folder: `apm install`
-> writes hundreds of files under `.agents/`, and a sync client locks them
-> mid-write, so the install fails with `WinError 5 (access denied)`.
+> Clone and run this lab from a plain local path such as `C:\labs`, not a file-sync folder like OneDrive or Dropbox, which can lock files while `apm install` writes.
 
 ## What's in this folder
 
