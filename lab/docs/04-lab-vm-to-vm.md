@@ -83,7 +83,7 @@ You need, on your machine:
 * Owner or Contributor on an Azure subscription you are willing to spend a small amount on.
 
 > [!IMPORTANT]
-> **Run this repository from a local, non-synced path** such as `C:\labs\HVE-SQL`. Do not keep it inside OneDrive, Dropbox, or any file-sync folder: `apm install` writes hundreds of skill files under `.agents/`, and a sync client locks them mid-write, so the install fails with `WinError 5 (access denied)`. A plain local path avoids this completely.
+> **Run this repository from a local, non-synced path** such as `C:\labs\FY27SQLMotion`. Do not keep it inside OneDrive, Dropbox, or any file-sync folder: `apm install` writes hundreds of skill files under `.agents/`, and a sync client locks them mid-write, so the install fails with `WinError 5 (access denied)`. A plain local path avoids this completely.
 
 **Everything this lab needs is in this repository**, so it runs standalone:
 
@@ -91,15 +91,26 @@ You need, on your machine:
 * [../knowledge-docs/](../knowledge-docs/) — the inventory and constraints the advisor reads to reason about the target (Modules 2 and 3).
 * This file — every `/squad` request is written inline in the module where you need it, so you never leave this page.
 
-### 0.2 Install the squad
+### 0.2 Get the lab
 
-Open this folder in VS Code, then install the squad package pinned to a reproducible commit:
+Clone the repository to a **local, non-synced path** (see the note above) and move into the lab folder:
+
+```powershell
+git clone https://github.com/fredgis/FY27SQLMotion.git C:\labs\FY27SQLMotion
+cd C:\labs\FY27SQLMotion\lab
+```
+
+Everything from here runs from this `lab/` folder. Open it in VS Code (`code .`) so Copilot Chat and the squad operate on it.
+
+### 0.3 Install the squad
+
+Install the squad package into the lab folder:
 
 ```powershell
 apm install "Peter-N91/hve-squad#v0.8.23"
 ```
 
-### 0.3 Confirm the advisor is reachable
+### 0.4 Confirm the advisor is reachable
 
 In Copilot Chat, agent mode:
 
