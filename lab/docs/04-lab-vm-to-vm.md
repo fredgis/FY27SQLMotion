@@ -219,16 +219,19 @@ The coordinator inspects the repository read-only, proposes the `azure` profile,
 ### 2.2 State the problem in the FDE's words
 
 ```text
-/squad request="We run SQL Server 2016 for the ContosoSales database on a Windows VM and must move it to Azure before extended support ends on 2026-07-14. Recommend the target Azure service, the migration method, the downtime class, the blockers with remediations, and the cost levers. Base it on ./knowledge-docs/legacy-inventory.md, ./knowledge-docs/migration-constraints.md, and the objects in ./source-env/sql."
+/squad request="I need to migrate the ContosoSales SQL Server 2016 database to Azure before extended support ends on 2026-07-14. Act as the SQL migration advisor and run your assessment interview with me, one question at a time — ask me the questions, don't assume the answers — then give me the scored recommendation card."
 ```
 
-The coordinator matches the `sql migration` routing pattern and dispatches `modernizer`, which resolves to the **Squad SQL Migration Advisor**. Notice that you did **not** tell it the answer. You asked it to recommend. The next module is where it earns that.
+The coordinator matches the `sql migration` routing pattern and dispatches `modernizer`, which resolves to the **Squad SQL Migration Advisor**. Crucially, you do **not** hand it the answers, no inventory files and no dependency dump. You ask it to *interview you*, which is what forces the advisor to run its questionnaire instead of pre-filling from a document. That interview is the next module.
+
+> [!IMPORTANT]
+> Do not point the advisor at `knowledge-docs/` or `source-env/sql` in this request. Those files contain the interview answers, and the advisor's rule is to pre-fill any answer you volunteer and only ask what is missing, so handing over the docs makes it jump straight to the recommendation and you lose the interview, the heart of the lab. Answer its questions live instead, using the table in Module 3 as your cheat-sheet.
 
 ---
 
 ## Module 3 — The advisor interview, the heart of the lab
 
-The advisor does not guess. It fetches the FY27 SQL knowledge base as its source of truth, then asks a short interview one question at a time, and only then scores a recommendation. Here is the interview as it plays out for Contoso, with the answer you give and why each answer matters.
+The advisor does not guess. It fetches the FY27 SQL knowledge base as its source of truth, then asks a short interview one question at a time, and only then scores a recommendation. The questions pop up as multiple-choice prompts in VS Code; answer each from the table below. Here is the interview as it plays out for Contoso, with the answer you give and why each answer matters.
 
 | # | Question | Contoso's answer | Effect on the decision |
 | --- | --- | --- | --- |
