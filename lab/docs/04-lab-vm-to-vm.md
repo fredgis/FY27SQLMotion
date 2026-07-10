@@ -157,13 +157,37 @@ The script asks you to type `DEPLOY` to confirm. It provisions a Windows Server 
 
 ### 1.4 Install the ContosoSales database
 
-Connect to the VM over RDP and run the installer against the local instance:
+SQL Server runs **on the VM**, and its port (1433) is never exposed to the internet, so you install the database **from the VM**, not from your workstation. `localhost` here means the VM's own SQL instance, so the scripts have to be on the VM first.
+
+Get the VM's public IP (from the resource group you deployed to in 1.3):
 
 ```powershell
-./source-env/scripts/Install-LegacyDatabase.ps1 -ServerInstance "localhost"
+az vm list-ip-addresses -g rg-hvesql-demo-weu -o table
 ```
 
-It runs the three scripts in order and leaves `ContosoSales` and `ContosoArchive` ready to inspect. To avoid opening the SQL port, you can instead run the install remotely with `az vm run-command`; see [../source-env/README.md](../source-env/README.md).
+RDP into it, sharing your local drive so you can copy the scripts across:
+
+```powershell
+mstsc /v:<vm-public-ip>
+```
+
+Sign in as `contosoadmin` with the password you set. In the Remote Desktop dialog, before connecting, open **Local Resources -> More...** and tick **Drives**.
+
+Now, **on the VM**, copy the `source-env` folder from your workstation and run the installer against the local instance:
+
+```powershell
+Copy-Item "\\tsclient\C\labs\FY27SQLMotion\lab\source-env" "C:\lab-source" -Recurse
+cd C:\lab-source
+.\scripts\Install-LegacyDatabase.ps1 -ServerInstance "localhost"
+```
+
+The VM administrator is a SQL `sysadmin` on the marketplace image, so Windows authentication works and `sqlcmd` is already present. The installer runs the three SQL scripts in order and leaves `ContosoSales` and `ContosoArchive` ready to inspect. Verify from the VM:
+
+```powershell
+sqlcmd -S localhost -E -Q "SELECT name FROM sys.databases WHERE name LIKE 'Contoso%'"
+```
+
+To install without RDP, use the `az vm run-command` method in [../source-env/README.md](../source-env/README.md#install-the-legacy-database).
 
 ### 1.5 What you just created
 

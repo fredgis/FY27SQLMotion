@@ -63,13 +63,47 @@ Provide the VM administrator password through the `SQLVM_ADMIN_PASSWORD` environ
 
 ## Install the legacy database
 
-The SQL Server images add the VM administrator to the SQL `sysadmin` role, so Windows authentication works out of the box. Connect to the VM over RDP and run:
+SQL Server runs on the VM, and port 1433 is not exposed to the internet, so the database is installed **from the VM**, never from your workstation. The marketplace image adds the VM administrator to the SQL `sysadmin` role, so Windows authentication works out of the box. Pick one of the two methods below.
+
+### Option A - over RDP (recommended)
+
+RDP into the VM (`mstsc /v:<vm-public-ip>`, sign in as the VM administrator). In the Remote Desktop dialog, under **Local Resources -> More...**, tick **Drives** so your workstation's disk is available on the VM. Then, on the VM:
 
 ```powershell
-./scripts/Install-LegacyDatabase.ps1 -ServerInstance "localhost"
+# adjust the source path to your local clone
+Copy-Item "\\tsclient\C\labs\FY27SQLMotion\lab\source-env" "C:\lab-source" -Recurse
+cd C:\lab-source
+.\scripts\Install-LegacyDatabase.ps1 -ServerInstance "localhost"
 ```
 
-The script runs the three SQL files in order and leaves `ContosoSales` and `ContosoArchive` ready to inspect.
+### Option B - without RDP, via `az vm run-command`
+
+This runs the install on the VM from your workstation, downloading the SQL from the public repository so nothing has to be copied and no port is opened. Adjust the resource group, VM name, and the raw URL owner/branch to match your deployment:
+
+```powershell
+$remote = @'
+$base = "https://raw.githubusercontent.com/fredgis/FY27SQLMotion/main/lab/source-env/sql"
+New-Item -ItemType Directory -Force C:\labsql | Out-Null
+"01-create-legacy-db.sql","02-seed-data.sql","03-legacy-features.sql" | ForEach-Object {
+  Invoke-WebRequest "$base/$_" -OutFile "C:\labsql\$_" -UseBasicParsing
+  sqlcmd -S localhost -E -b -i "C:\labsql\$_"
+}
+'@
+az vm run-command invoke `
+  --resource-group rg-hvesql-demo-weu `
+  --name hvesql-demo-sql2016-vm `
+  --command-id RunPowerShellScript `
+  --scripts $remote
+```
+
+> [!NOTE]
+> `az vm run-command` executes as `NT AUTHORITY\SYSTEM`. On some images SYSTEM is not a SQL `sysadmin`; if the run reports a login or permission error, use Option A (RDP), where you run as the VM administrator, who is `sysadmin`.
+
+Both methods run the three SQL files in order and leave `ContosoSales` and `ContosoArchive` ready to inspect. Verify from the VM:
+
+```powershell
+sqlcmd -S localhost -E -Q "SELECT name FROM sys.databases WHERE name LIKE 'Contoso%'"
+```
 
 ## Security notes
 
