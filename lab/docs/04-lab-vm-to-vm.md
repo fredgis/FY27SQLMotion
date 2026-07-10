@@ -306,11 +306,13 @@ The **Squad Cost Manager** returns an indicative monthly figure through the pric
 
 ### 4.2 Azure Architect — design the target
 
+You do **not** hand the architect a finished spec. You give it the advisor's recommendation and let it *design*, so the network topology, the NSG rules, the management-access approach, the disk layout, and the licensing come out as its own recommendation, each choice explained. That is the point of an agentic platform: every answer is built from the previous agents' outputs, not dictated by you.
+
 ```text
-/squad request="Design the HLD and LLD for the recommended SQL Server on Azure VM target in France Central: a private VNet and subnet, an NSG that allows RDP only from an admin CIDR and SQL 1433 only from the VNet (no public SQL endpoint), a Standard static public IP for RDP management only, a separate Premium data disk for SQL data/log and the FILESTREAM container, and Azure Hybrid Benefit licensing. Use Azure Verified Modules and a landing-zone-aligned layout."
+/squad request="Based on the advisor's recommendation (SQL Server on Azure VM in France Central, FILESTREAM preserved, private access only, Azure Hybrid Benefit eligible), design a secure, Well-Architected, landing-zone-aligned HLD and LLD for the target. Recommend the network topology, the NSG rules, how to expose management access safely, the disk layout for SQL data/log and the FILESTREAM container, and the licensing, and explain each choice. Write the HLD and LLD to target-env/HLD-LLD.md."
 ```
 
-The **Squad Azure Architect** emits a Mermaid HLD and an LLD resource table, and writes them to `target-env/HLD-LLD.md` **live**, the folder starts empty, so the design appears in front of you. Note France Central (West Europe compute is capacity-restricted on the lab subscription, and France Central preserves EU residency), the no-public-SQL-endpoint boundary, the separate data disk that keeps FILESTREAM on local NTFS, and Azure Hybrid Benefit modeled as a runtime toggle. Point out that the design reflects the advisor's VM target, not a generic template.
+The **Squad Azure Architect** builds on the advisor's card plus Azure Well-Architected and landing-zone best practices, then writes a Mermaid HLD and an LLD resource table to `target-env/HLD-LLD.md` **live**, the folder starts empty, so the design appears in front of you. Watch it *justify* its choices rather than restate a spec: a private VNet with no public SQL endpoint, an NSG that locks RDP to an admin CIDR and SQL 1433 to the VNet, a separate Premium data disk that keeps FILESTREAM on local NTFS, and Azure Hybrid Benefit as a runtime toggle. The design is reasoned from the advisor's VM target and best practice, not a generic template.
 
 ### 4.3 The spine gate — research and plan before code
 
