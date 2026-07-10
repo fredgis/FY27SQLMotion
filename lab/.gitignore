@@ -1,5 +1,7 @@
 # HVE Squad is installed via `apm install` — reinstall it, never commit it
 .agents/
+.github/
+.copilot/
 apm_modules/
 
 # Squad working state (planning artifacts, decisions, history)
