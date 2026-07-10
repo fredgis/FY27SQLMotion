@@ -295,6 +295,9 @@ With the card in hand, the coordinator runs the delivery methodology around it. 
 
 ### 4.1 Cost Manager — price the target
 
+> [!NOTE]
+> **Where does `Standard_D4s_v3` come from?** Not from the advisor. The advisor gives you the target and the sizing *discipline*, measure the real workload with Perfmon for 7+ days and add about 20% headroom, never guess from average CPU, but not a specific SKU. The size below is an **illustrative starting point** that you, the field engineer, supply so the Cost Manager has something concrete to price; it is a reasonable default for the ContosoSales profile (about 90 GB, moderate OLTP). In a real engagement you replace it with the size from the Perfmon or Azure Migrate assessment, then re-run this cost step.
+
 ```text
 /squad request="Estimate the indicative monthly Azure cost for the recommended target: a SQL Server on Azure Virtual Machine (Standard_D4s_v3, Windows Server 2022 with SQL Server Developer/Standard edition) in France Central, with a 256 GB Premium SSD data disk plus the OS disk. Show the list price and the price with Azure Hybrid Benefit (Windows + SQL) applied, note that Extended Security Updates are free on Azure VMs, and add WAF cost-optimization recommendations including reserved instances."
 ```
