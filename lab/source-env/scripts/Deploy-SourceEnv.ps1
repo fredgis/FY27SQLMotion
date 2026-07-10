@@ -19,7 +19,7 @@
 [CmdletBinding()]
 param(
     [string]$SubscriptionId,
-    [string]$ResourceGroup = 'rg-hvesql-demo-weu',
+    [string]$ResourceGroup = 'rg-hvesql-demo',
     [string]$Location = 'westeurope',
     [Parameter(Mandatory = $true)]
     [string]$AllowedRdpSourceAddressPrefix,

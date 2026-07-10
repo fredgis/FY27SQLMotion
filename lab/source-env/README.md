@@ -90,7 +90,7 @@ New-Item -ItemType Directory -Force C:\labsql | Out-Null
 }
 '@
 az vm run-command invoke `
-  --resource-group rg-hvesql-demo-weu `
+  --resource-group rg-hvesql-demo `
   --name hvesql-demo-sql2016-vm `
   --command-id RunPowerShellScript `
   --scripts $remote
@@ -116,11 +116,11 @@ sqlcmd -S localhost -E -Q "SELECT name FROM sys.databases WHERE name LIKE 'Conto
 * The VM accrues cost while it is running. Stop and deallocate it between sessions:
 
   ```powershell
-  az vm deallocate --resource-group rg-hvesql-demo-weu --name hvesql-demo-sql2016-vm
+  az vm deallocate --resource-group rg-hvesql-demo --name hvesql-demo-sql2016-vm
   ```
 
 * Tear the whole environment down when you are done:
 
   ```powershell
-  az group delete --name rg-hvesql-demo-weu --yes --no-wait
+  az group delete --name rg-hvesql-demo --yes --no-wait
   ```

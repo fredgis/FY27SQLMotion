@@ -51,7 +51,7 @@ The advisor skill encodes this directly: FILESTREAM (and FileTable, PolyBase, DT
 
 ```mermaid
 flowchart LR
-    subgraph SRC["Source · rg-hvesql-demo-weu · West Europe"]
+    subgraph SRC["Source · rg-hvesql-demo · West Europe (default)"]
         SVM["SQL Server 2016 SP2 (Standard)\nWindows Server 2016 VM\nContosoSales + ContosoArchive (~90 GB)\nFILESTREAM · xp_cmdshell · CLR · Service Broker\nSQL Agent · Database Mail · linked server · TDE"]
     end
     subgraph TGT["Target · rg-hvesql-target-frc · France Central"]
@@ -153,7 +153,10 @@ This lab deploys a live source. Review the what-if output, then create the resou
 ./source-env/scripts/Deploy-SourceEnv.ps1 -AllowedRdpSourceAddressPrefix "<your-public-ip>/32" -Deploy
 ```
 
-The script asks you to type `DEPLOY` to confirm. It provisions a Windows Server 2016 VM with SQL Server 2016 SP2 into `rg-hvesql-demo-weu` in West Europe, reachable over RDP from your address only. SQL port 1433 is never exposed to the internet.
+The script asks you to type `DEPLOY` to confirm. It provisions a Windows Server 2016 VM with SQL Server 2016 SP2 into `rg-hvesql-demo` in West Europe by default, reachable over RDP from your address only. SQL port 1433 is never exposed to the internet.
+
+> [!NOTE]
+> **No capacity in West Europe?** The source deploys to `westeurope` by default. If the preview or deploy reports `SkuNotAvailable`, that region has no `Standard_D2s_v3` capacity for your subscription, so re-run with another EU region, for example `-Location francecentral` (or `northeurope`, `swedencentral`). The resource group is named `rg-hvesql-demo` with no region baked into the name, so every later command (IP lookup, deallocate, delete) stays the same. Find a region that has the size with `az vm list-skus --size Standard_D2s_v3 --resource-type virtualMachines --query "[].locations[0]" -o tsv`.
 
 ### 1.4 Install the ContosoSales database
 
@@ -162,7 +165,7 @@ SQL Server runs **on the VM**, and its port (1433) is never exposed to the inter
 Get the VM's public IP (from the resource group you deployed to in 1.3):
 
 ```powershell
-az vm list-ip-addresses -g rg-hvesql-demo-weu -o table
+az vm list-ip-addresses -g rg-hvesql-demo -o table
 ```
 
 RDP into it, sharing your local drive so you can copy the scripts across:
@@ -200,7 +203,7 @@ The installed objects are the evidence the advisor reasons from:
 | Service Broker, `xp_cmdshell` export proc, Database Mail proc, SQL Agent nightly close | [../source-env/sql/03-legacy-features.sql](../source-env/sql/03-legacy-features.sql) | The features that decide the target |
 
 > [!IMPORTANT]
-> Deallocate the VM when you pause: `az vm deallocate --resource-group rg-hvesql-demo-weu --name hvesql-demo-sql2016-vm`. A running VM accrues cost.
+> Deallocate the VM when you pause: `az vm deallocate --resource-group rg-hvesql-demo --name hvesql-demo-sql2016-vm`. A running VM accrues cost.
 
 ---
 
@@ -408,10 +411,10 @@ The source VM costs money, and the squad writes generated files. To reset:
 
 ```powershell
 # Stop the source VM between sessions
-az vm deallocate --resource-group rg-hvesql-demo-weu --name hvesql-demo-sql2016-vm
+az vm deallocate --resource-group rg-hvesql-demo --name hvesql-demo-sql2016-vm
 
 # Tear the source environment down when finished
-az group delete --name rg-hvesql-demo-weu --yes --no-wait
+az group delete --name rg-hvesql-demo --yes --no-wait
 ```
 
 To rerun the squad cleanly, discard the generated planning artifacts under `.copilot-tracking/squad/` and any regenerated files under `target-env/` with version control, leaving `source-env/`, `knowledge-docs/`, and `docs/` untouched.
@@ -432,5 +435,5 @@ To rerun the squad cleanly, discard the generated planning artifacts under `.cop
 
 * **The advisor recommended Managed Instance, not VM.** It was probably not given the FILESTREAM and `xp_cmdshell` dependencies, or it was told to remediate them. Re-run Module 2.2 and make sure the request points at `legacy-inventory.md` and `source-env/sql`, where those dependencies live.
 * **"Why not Managed Instance?"** Because FILESTREAM and `xp_cmdshell` are unsupported there, and remediating them is application rework the constraints put out of scope. See the comparison table above.
-* **The what-if reports image or capacity errors.** Confirm a valid image SKU and region with `az vm image list`, and remember the target uses France Central because West Europe compute is capacity-restricted on the lab subscription.
+* **The source deploy reports `SkuNotAvailable` or a capacity error.** West Europe has no `Standard_D2s_v3` capacity for your subscription, so re-run the deploy with another EU region, for example `-Location francecentral`; the `rg-hvesql-demo` name has no region baked in, so nothing else changes. The what-if target uses France Central for the same reason.
 * **The squad tried to deploy.** It should not. If a role proposes an apply, the Impactful-Action Gate must stop it for your approval. Decline, and report it, that pause is the product.
