@@ -365,7 +365,13 @@ The **As-Built Author** and **Azure Diagnose** roles are strictly read-only. The
 
 ## Module 5 — The VM-to-VM cutover runbook
 
-The squad plans, prices, and validates. The actual cutover is a runbook a human executes in the weekend window. Because the target is a SQL Server VM, the runbook preserves every feature. Order matters most for the encryption certificate.
+The cutover is the one part a human executes, but the squad still **authors** the runbook for you, building on the advisor's method and blockers and the architect's design, one more link in the agent chain. Ask for it:
+
+```text
+/squad request="Author the weekend cutover runbook for this VM-to-VM migration, building on the advisor's recommendation (native backup/restore, minimal downtime) and its blockers, and the architect's target design. Sequence it step by step for a human to execute, preserve every legacy feature, and put the TDE server certificate restore before any encrypted database. Cover pre-cutover assessment, seeding, gap-narrowing, the weekend cutover, re-establishing instance-level features, and validation."
+```
+
+The coordinator routes this through `modernizer` to the **SQL Migration Advisor**, which turns its own method and blockers into an ordered, human-executable runbook. A good result looks like this, and order matters most for the encryption certificate:
 
 1. **Pre-cutover (days before).** Run an Azure Migrate dependency pass to surface every linked server and SQL Agent job. Capture Perfmon for at least 7 days for sizing. Provision the target VM from the validated Bicep (this is the gated deploy, approved deliberately).
 2. **Back up the TDE certificate first.** On the source, back up the server certificate and its private key. Restore it to the target instance **before** any encrypted database. Skipping this order is the single most common cause of a failed restore.
@@ -376,7 +382,7 @@ The squad plans, prices, and validates. The actual cutover is a runbook a human 
 7. **Validate and switch.** Run a smoke test of the nightly close and the ordering/invoicing message flow, then repoint the application connection string to the target and monitor.
 
 > [!NOTE]
-> This runbook is the "faire la migration" step of the lab. The squad produces the plan and the IaC; you execute the cutover against the source you deployed in Module 1 if you choose to take the lab all the way through.
+> This runbook is the "faire la migration" step of the lab. The squad **authors** it, from the advisor's method and the architect's design, alongside the plan and the IaC; you execute the cutover against the source you deployed in Module 1 if you choose to take the lab all the way through.
 
 ---
 
