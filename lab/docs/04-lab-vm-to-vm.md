@@ -293,18 +293,7 @@ Contoso keeps `xp_cmdshell`, FILESTREAM, CLR, Service Broker, SQL Agent, and the
 
 With the card in hand, the coordinator runs the delivery methodology around it. Send each request in turn and watch a different named role own the outcome. This is where "the whole framework" is visible.
 
-### 4.1 Cost Manager — price the target
-
-> [!NOTE]
-> **Where does `Standard_D4s_v3` come from?** Not from the advisor. The advisor gives you the target and the sizing *discipline*, measure the real workload with Perfmon for 7+ days and add about 20% headroom, never guess from average CPU, but not a specific SKU. The size below is an **illustrative starting point** that you, the field engineer, supply so the Cost Manager has something concrete to price; it is a reasonable default for the ContosoSales profile (about 90 GB, moderate OLTP). In a real engagement you replace it with the size from the Perfmon or Azure Migrate assessment, then re-run this cost step.
-
-```text
-/squad request="Estimate the indicative monthly Azure cost for the recommended target: a SQL Server on Azure Virtual Machine (Standard_D4s_v3, Windows Server 2022 with SQL Server Developer/Standard edition) in France Central, with a 256 GB Premium SSD data disk plus the OS disk. Show the list price and the price with Azure Hybrid Benefit (Windows + SQL) applied, note that Extended Security Updates are free on Azure VMs, and add WAF cost-optimization recommendations including reserved instances."
-```
-
-The **Squad Cost Manager** returns an indicative monthly figure through the pricing path, shows the Azure Hybrid Benefit saving, and ties it to the avoided Extended Security Updates cost. Note the framework signal: it delegates live price lookups rather than inventing numbers.
-
-### 4.2 Azure Architect — design the target
+### 4.1 Azure Architect — design the target
 
 You do **not** hand the architect a finished spec. You give it the advisor's recommendation and let it *design*, so the network topology, the NSG rules, the management-access approach, the disk layout, and the licensing come out as its own recommendation, each choice explained. That is the point of an agentic platform: every answer is built from the previous agents' outputs, not dictated by you.
 
@@ -314,6 +303,19 @@ You do **not** hand the architect a finished spec. You give it the advisor's rec
 
 The **Squad Azure Architect** builds on the advisor's card plus Azure Well-Architected and landing-zone best practices, then writes a Mermaid HLD and an LLD resource table to `target-env/HLD-LLD.md` **live**, the folder starts empty, so the design appears in front of you. Watch it *justify* its choices rather than restate a spec: a private VNet with no public SQL endpoint, an NSG that locks RDP to an admin CIDR and SQL 1433 to the VNet, a separate Premium data disk that keeps FILESTREAM on local NTFS, and Azure Hybrid Benefit as a runtime toggle. The design is reasoned from the advisor's VM target and best practice, not a generic template.
 
+### 4.2 Cost Manager — price the design
+
+Now the Cost Manager prices what the architect just designed, not a guess. The only thing the architect deliberately leaves open is the VM size, which needs real workload data, so you supply an illustrative starting size for the estimate.
+
+> [!NOTE]
+> The architect gave you the topology and the disk **layout**, but not the VM **size** or disk **capacity**, those come from measurement (Perfmon for 7+ days plus about 20% headroom, never from average CPU). The `Standard_D4s_v3` and 256 GB below are illustrative starting points for the ContosoSales profile (about 90 GB, moderate OLTP); replace them with the size from the Perfmon or Azure Migrate assessment and re-run this step.
+
+```text
+/squad request="Estimate the indicative monthly Azure cost for the target the architect just designed: a SQL Server on Azure Virtual Machine (Windows Server 2022 with SQL Server Developer/Standard edition) in France Central, using Standard_D4s_v3 as an illustrative size with a 256 GB Premium SSD data disk plus the OS disk. Show the list price and the price with Azure Hybrid Benefit (Windows + SQL) applied, note that Extended Security Updates are free on Azure VMs, and add WAF cost-optimization recommendations including reserved instances."
+```
+
+The **Squad Cost Manager** returns an indicative monthly figure through the pricing path, shows the Azure Hybrid Benefit saving, and ties it to the avoided Extended Security Updates cost. Note the framework signal: it delegates live price lookups rather than inventing numbers.
+
 ### 4.3 The spine gate — research and plan before code
 
 The next request is implementation-tier, so before a line of Bicep is written the coordinator runs the **implementation gate**: the **Task Researcher** gathers module facts and the **Task Planner** sequences the work. Name this out loud, the code is planned and researched first, never written cold. This is the Research-Plan-Implement-Review spine that rides under every profile.
@@ -321,10 +323,10 @@ The next request is implementation-tier, so before a line of Bicep is written th
 ### 4.4 IaC Author — write the infrastructure
 
 ```text
-/squad request="Author the Bicep for that LLD under target-env/infra/bicep using AVM modules where available, with a network module and a SQL-VM module, an Azure Hybrid Benefit toggle, and a parameterized admin RDP CIDR. Do not deploy."
+/squad request="Author the Bicep for the architect's LLD under target-env/infra/bicep, structured with Azure Verified Modules, and parameterize what should be configurable (at least the admin RDP CIDR and the Azure Hybrid Benefit toggle). Do not deploy."
 ```
 
-The **Squad IaC Author** writes the target Bicep to `target-env/infra/bicep` **live**, a network module and a SQL-VM module authored in front of you into the empty folder. Inspect two framework-relevant choices in the output: the NSG never opens 1433 to the internet, and Azure Hybrid Benefit is a `bool` parameter, not a hardcoded value, because licensing is a commercial fact confirmed with the customer.
+The **Squad IaC Author** reads the architect's LLD and structures the Bicep itself, writing it to `target-env/infra/bicep` **live** into the empty folder, you did not dictate the module breakdown. Inspect two framework-relevant choices in the output: the NSG never opens 1433 to the internet, and Azure Hybrid Benefit is a `bool` parameter, not a hardcoded value, because licensing is a commercial fact confirmed with the customer.
 
 ### 4.5 Optional — convene the council
 
