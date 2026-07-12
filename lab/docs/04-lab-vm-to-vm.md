@@ -71,7 +71,7 @@ This lab has three tracks. **Track A is the point of the lab** — the HVE Squad
 
 | Track | What you do | Modules | Time | Cost |
 | --- | --- | --- | --- | --- |
-| **A — HVE Squad (core)** | Install the squad, run the advisor interview, and let every role deliver the recommendation card, HLD/LLD, cost, target Bicep, and the cutover runbook | 0, 2, 3, 4, 5 (6 and 7 optional) | ~60–75 min | **$0** |
+| **A — HVE Squad (core)** | Install the squad, run the advisor interview, and let every role deliver the recommendation card, HLD/LLD, cost, target Bicep, and the cutover runbook — passing through the framework's governance gates (implementation gate, council, Impactful-Action Gate) along the way | 0, 2, 3, 4, 5 (6 and 7 optional) | ~60–75 min | **$0** |
 | **B — Live source** *(optional)* | Deploy and seed a real SQL Server 2016 source VM to inspect | + 1 | +30–40 min | a few $ while it runs |
 | **C — Execute** *(optional)* | Approve the target what-if / deploy, then execute the cutover runbook against the Track B source | 4.6 deploy gate + runbook execution | +varies | a few $ |
 
@@ -323,6 +323,14 @@ Contoso keeps `xp_cmdshell`, FILESTREAM, CLR, Service Broker, SQL Agent, and the
 
 With the card in hand, the coordinator runs the delivery methodology around it. Send each request in turn and watch a different named role own the outcome. This is where "the whole framework" is visible.
 
+> [!IMPORTANT]
+> **Governance touchpoints — do not skip these.** Three of the steps below are where the HVE framework *enforces* governance, and together they are a core learning objective of this lab. Watch for each one by name:
+> * **The implementation gate (4.3)** — no code is written until the Research-Plan-Implement-Review spine has researched and planned it first.
+> * **The council (4.5)** — a mandatory pre-implementation cross-check across architecture, security, cost, and product-fit, synthesized `most-restrictive-wins` into a durable, auditable Council Verdict in `decisions.md`.
+> * **The Impactful-Action Gate (4.6)** — the squad is autonomous right up to the point of spending money or changing a subscription, then it stops and waits for a human.
+>
+> Every decision is recorded by the **Squad Scribe** to `decisions.md` and `history/`, so the whole run stays auditable. These are not optional flourishes — they are the reason an agentic squad can be trusted with a real migration.
+
 ### 4.1 Azure Architect — design the target
 
 You do **not** hand the architect a finished spec. You give it the advisor's recommendation and let it *design*, so the network topology, the NSG rules, the management-access approach, the disk layout, and the licensing come out as its own recommendation, each choice explained. That is the point of an agentic platform: every answer is built from the previous agents' outputs, not dictated by you.
@@ -358,13 +366,16 @@ The next request is implementation-tier, so before a line of Bicep is written th
 
 The **Squad IaC Author** reads the architect's LLD and structures the Bicep itself, writing it to `target-env/infra/bicep` **live** into the empty folder, you did not dictate the module breakdown. Inspect two framework-relevant choices in the output: the NSG never opens 1433 to the internet, and Azure Hybrid Benefit is a `bool` parameter, not a hardcoded value, because licensing is a commercial fact confirmed with the customer.
 
-### 4.5 Optional — convene the council
+### 4.5 Convene the council — the mandatory governance cross-check
+
+> [!IMPORTANT]
+> This is a **required governance step**, not an optional detour. The council is the framework's pre-implementation cross-check, and it is the single most visible piece of HVE governance in the whole lab. Run it before you go anywhere near the deployment gate.
 
 ```text
 /squad request="Convene a pre-implementation council on the target-env Bicep and the migration plan: architecture, security, cost, and product-fit. Give me a go / no-go with conditions."
 ```
 
-The coordinator dispatches `architect`, `security`, `cost-manager`, and `product-owner` in parallel. Each returns a verdict (`Approve`, `Conditional`, `Concern`, `Block`) and a risk label. The Scribe synthesizes them with a **most-restrictive-wins** rule and writes a single Council Verdict to `decisions.md`. This is the framework's pre-implementation cross-check, and its verdict gates the next dispatch.
+The coordinator dispatches `architect`, `security`, `cost-manager`, and `product-owner` in parallel. Each returns a verdict (`Approve`, `Conditional`, `Concern`, `Block`) and a risk label. The Scribe synthesizes them with a **most-restrictive-wins** rule and writes a single, auditable Council Verdict to `decisions.md`. This is the framework's pre-implementation cross-check, and its verdict gates the next dispatch — a single `Block` from any member stops the deploy, no matter how many `Approve` verdicts it sits beside. That is governance you can point at.
 
 ### 4.6 Deployer — what-if, then the gate
 
@@ -387,6 +398,9 @@ Point these at a resource group you already own so they produce real output with
 ```
 
 The **As-Built Author** and **Azure Diagnose** roles are strictly read-only. They show the squad keeps adding value after a deploy, on infrastructure that already exists.
+
+> [!NOTE]
+> The as-built's **compliance matrix from Azure Policy state** is the read-only *governance* beat of this module: it reports how a live resource group measures against the policies assigned to it. Producing the real matrix (and the Resource Health / Azure Monitor / Resource Graph signals the diagnose role ranks) needs the optional Azure MCP wiring mentioned in [Module 0.4](#04-confirm-the-advisor-is-reachable). Without it, these two roles still run and explain *what* they would report, but cannot pull live policy/health data — wire up Azure MCP if you want the compliance matrix populated for real.
 
 ---
 
