@@ -83,7 +83,7 @@ This runs the install on the VM from your workstation, downloading the SQL and t
 ```powershell
 $remote = @'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$owner = "flthibau"; $branch = "flthibau/hve-sql-lab"
+$owner = "fredgis"; $branch = "main"
 $base = "https://raw.githubusercontent.com/$owner/FY27SQLMotion/$branch/lab/source-env"
 New-Item -ItemType Directory -Force C:\labsql\sql | Out-Null
 "01-create-legacy-db.sql","02-seed-data.sql","03-legacy-features.sql" | ForEach-Object {

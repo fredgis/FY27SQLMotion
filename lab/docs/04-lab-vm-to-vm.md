@@ -12,6 +12,9 @@ This is the complete, end-to-end lab around `ContosoSales`. You start from nothi
 
 This lab is written for you to *do*. It deploys the source, drives the advisor to the VM-to-VM answer, and walks each agent's contribution slowly enough to learn from.
 
+> [!NOTE]
+> **You do not have to run all of it.** The HVE Squad walkthrough (Track A, Modules 2 through 5) is the heart of the lab and runs on its own with **no Azure spend and no source VM**. Deploying the live source (Module 1) and executing the migration are optional add-ons. See [Choose your track](#choose-your-track) below before you start.
+
 ### Learning objectives
 
 By the end you will be able to:
@@ -62,15 +65,28 @@ flowchart LR
     SMTP["SMTP relay"] -.->|"Database Mail 587"| TVM
 ```
 
-## Time, cost, and safety
+## Choose your track
 
-* **Modules 0 and 1** deploy a real source VM, so they cost money while it runs. Deallocate it between sessions and delete it when you finish (see [Reset and cleanup](#reset-and-cleanup)).
-* **Modules 2 through 5** are planning and advisory. They spend nothing. The target is validated with a what-if only, no managed resource is provisioned.
+This lab has three tracks. **Track A is the point of the lab** — the HVE Squad and its SQL Migration Advisor — and it runs entirely on planning and advisory work with **zero Azure spend and no VM**. The advisor reasons from the inventory in [`../knowledge-docs/`](../knowledge-docs/), so you do not need a live database to complete it. Tracks B and C are optional add-ons for when you want a real source to inspect or an end-to-end execution.
+
+| Track | What you do | Modules | Time | Cost |
+| --- | --- | --- | --- | --- |
+| **A — HVE Squad (core)** | Install the squad, run the advisor interview, and let every role deliver the recommendation card, HLD/LLD, cost, target Bicep, and the cutover runbook | 0, 2, 3, 4, 5 (6 and 7 optional) | ~60–75 min | **$0** |
+| **B — Live source** *(optional)* | Deploy and seed a real SQL Server 2016 source VM to inspect | + 1 | +30–40 min | a few $ while it runs |
+| **C — Execute** *(optional)* | Approve the target what-if / deploy, then execute the cutover runbook against the Track B source | 4.6 deploy gate + runbook execution | +varies | a few $ |
+
+> [!TIP]
+> Short on time or budget? Do **Track A only**. It is self-contained: Modules 2 through 5 never touch Azure and never need the source VM. Add Track B when you want a live database to point at, and Track C when you want to run the migration for real.
+
+## Cost and safety
+
+* **Module 1 (Track B)** deploys a real source VM, so it costs money while it runs. Deallocate it between sessions and delete it when you finish (see [Reset and cleanup](#reset-and-cleanup)).
+* **Modules 2 through 5 (Track A)** are planning and advisory. They spend nothing. The target is validated with a what-if only, no managed resource is provisioned.
 * **Every deploy stays behind the squad's Impactful-Action Gate.** Nothing reaches Azure without your explicit approval.
 
 ---
 
-## Module 0 — Prerequisites and squad install
+## Module 0 — Prerequisites and squad install (Track A · ~15 min · $0)
 
 ### 0.1 Prerequisites
 
@@ -96,7 +112,7 @@ You need, on your machine:
 Clone the repository to a **local, non-synced path** (see the note above) and move into the lab folder:
 
 ```powershell
-git clone -b flthibau/hve-sql-lab https://github.com/flthibau/FY27SQLMotion.git C:\labs\FY27SQLMotion
+git clone https://github.com/fredgis/FY27SQLMotion.git C:\labs\FY27SQLMotion
 cd C:\labs\FY27SQLMotion\lab
 ```
 
@@ -122,7 +138,10 @@ You should see the Azure cast plus `modernizer`. The optional Azure MCP wiring f
 
 ---
 
-## Module 1 — Deploy and seed the legacy source
+## Module 1 — Deploy and seed the legacy source (Track B · optional · ~35 min · costs money)
+
+> [!NOTE]
+> **This module is optional.** It belongs to Track B and is the only part that spends money. The HVE Squad (Modules 2 through 5) does **not** need it — the advisor reasons from the inventory in [`../knowledge-docs/`](../knowledge-docs/), not from a live database. Deploy this only if you want a real SQL Server 2016 to inspect, or if you intend to run the cutover for real in Track C. To stay on Track A, skip straight to [Module 2](#module-2--enter-the-fde-open-the-migration-request).
 
 This module gives the advisor a real thing to inspect: a running SQL Server 2016 with the objects that drive the decision.
 
@@ -209,7 +228,10 @@ The installed objects are the evidence the advisor reasons from:
 
 ---
 
-## Module 2 — Enter the FDE: open the migration request
+## Module 2 — Enter the FDE: open the migration request (Track A · ~10 min · $0)
+
+> [!NOTE]
+> Track A starts here and runs to the end of Module 5 with **no Azure spend and no source VM**. If you skipped Module 1, that is expected — the advisor works entirely from [`../knowledge-docs/`](../knowledge-docs/).
 
 Now you are the field engineer who owns the migration. Every `/squad` request you need is inline below, ready to copy.
 
@@ -237,7 +259,7 @@ The coordinator matches the `sql migration` routing pattern and dispatches `mode
 
 ---
 
-## Module 3 — The advisor interview, the heart of the lab
+## Module 3 — The advisor interview, the heart of the lab (Track A · ~15 min · $0)
 
 The advisor does not guess. It fetches the FY27 SQL knowledge base as its source of truth, then asks a short interview one question at a time, and only then scores a recommendation. The questions pop up as multiple-choice prompts in VS Code; answer each from the table below. Here is the interview as it plays out for Contoso, with the answer you give and why each answer matters.
 
@@ -297,7 +319,7 @@ Contoso keeps `xp_cmdshell`, FILESTREAM, CLR, Service Broker, SQL Agent, and the
 
 ---
 
-## Module 4 — The squad delivers, agent by agent
+## Module 4 — The squad delivers, agent by agent (Track A · ~30 min · $0)
 
 With the card in hand, the coordinator runs the delivery methodology around it. Send each request in turn and watch a different named role own the outcome. This is where "the whole framework" is visible.
 
@@ -368,7 +390,7 @@ The **As-Built Author** and **Azure Diagnose** roles are strictly read-only. The
 
 ---
 
-## Module 5 — The VM-to-VM cutover runbook
+## Module 5 — The VM-to-VM cutover runbook (Track A · ~10 min · $0)
 
 The cutover is the one part a human executes, but the squad still **authors** the runbook for you, building on the advisor's method and blockers and the architect's design, one more link in the agent chain. Ask for it:
 
@@ -391,7 +413,7 @@ The coordinator routes this through `modernizer` to the **SQL Migration Advisor*
 
 ---
 
-## Module 6 — One-line autopilot variant
+## Module 6 — One-line autopilot variant (Track A alternative · ~10 min · $0)
 
 To see the squad sequence the whole pipeline from a single line instead of running Modules 2 through 4 by hand:
 
@@ -401,7 +423,7 @@ To see the squad sequence the whole pipeline from a single line instead of runni
 
 Autopilot sequences research, plan, council, implement, and review by itself, and stops at the gate. If the review gate finds an unremediated blocker, for example the TDE certificate order left unaddressed, it escalates instead of shipping. That escalation is a feature; read it out loud.
 
-## Module 7 — Hand it to the cloud coding agent
+## Module 7 — Hand it to the cloud coding agent (Track A alternative · async · $0)
 
 The same work can run without you at the keyboard. Open [../copilot/coding-agent-task.md](../copilot/coding-agent-task.md), paste its body into a GitHub issue in your fork, and assign the issue to the GitHub Copilot coding agent. It follows the same guardrails, plans, prices, authors the target IaC, runs a what-if only, and returns a pull request. Review that pull request as the closing beat.
 
