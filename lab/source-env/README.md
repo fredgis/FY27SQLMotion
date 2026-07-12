@@ -63,7 +63,7 @@ Provide the VM administrator password through the `SQLVM_ADMIN_PASSWORD` environ
 
 ## Install the legacy database
 
-SQL Server runs on the VM, and port 1433 is not exposed to the internet, so the database is installed **from the VM**, never from your workstation. The marketplace image adds the VM administrator to the SQL `sysadmin` role, so Windows authentication works out of the box. Pick one of the two methods below.
+SQL Server runs on the VM, and port 1433 is not exposed to the internet, so the database is installed **from the VM**, never from your workstation. The marketplace image grants the SQL `sysadmin` role only to the built-in `sa` login, **not** to the VM administrator, so a plain Windows-authentication install would fail with `CREATE DATABASE permission denied`. `Install-LegacyDatabase.ps1` handles this automatically: it detects that the current login is not a sysadmin and grants it the role (via a brief single-user-mode restart of the local default instance) before running the scripts. Pick one of the two methods below.
 
 ### Option A - over RDP (recommended)
 
@@ -78,16 +78,19 @@ cd C:\lab-source
 
 ### Option B - without RDP, via `az vm run-command`
 
-This runs the install on the VM from your workstation, downloading the SQL from the public repository so nothing has to be copied and no port is opened. Adjust the resource group, VM name, and the raw URL owner/branch to match your deployment:
+This runs the install on the VM from your workstation, downloading the SQL and the installer from the public repository so nothing has to be copied and no port is opened. `az vm run-command` executes as `NT AUTHORITY\SYSTEM`, which the marketplace image does **not** grant sysadmin either, so this path downloads and runs `Install-LegacyDatabase.ps1`, which self-elevates the current principal before seeding. Edit `$owner` and `$branch` to match the fork and branch you cloned from:
 
 ```powershell
 $remote = @'
-$base = "https://raw.githubusercontent.com/fredgis/FY27SQLMotion/main/lab/source-env/sql"
-New-Item -ItemType Directory -Force C:\labsql | Out-Null
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$owner = "flthibau"; $branch = "flthibau/hve-sql-lab"
+$base = "https://raw.githubusercontent.com/$owner/FY27SQLMotion/$branch/lab/source-env"
+New-Item -ItemType Directory -Force C:\labsql\sql | Out-Null
 "01-create-legacy-db.sql","02-seed-data.sql","03-legacy-features.sql" | ForEach-Object {
-  Invoke-WebRequest "$base/$_" -OutFile "C:\labsql\$_" -UseBasicParsing
-  sqlcmd -S localhost -E -b -i "C:\labsql\$_"
+  Invoke-WebRequest "$base/sql/$_" -OutFile "C:\labsql\sql\$_" -UseBasicParsing
 }
+Invoke-WebRequest "$base/scripts/Install-LegacyDatabase.ps1" -OutFile "C:\labsql\Install-LegacyDatabase.ps1" -UseBasicParsing
+& C:\labsql\Install-LegacyDatabase.ps1 -ServerInstance "localhost" -SqlScriptFolder "C:\labsql\sql"
 '@
 az vm run-command invoke `
   --resource-group rg-hvesql-demo `
@@ -97,7 +100,7 @@ az vm run-command invoke `
 ```
 
 > [!NOTE]
-> `az vm run-command` executes as `NT AUTHORITY\SYSTEM`. On some images SYSTEM is not a SQL `sysadmin`; if the run reports a login or permission error, use Option A (RDP), where you run as the VM administrator, who is `sysadmin`.
+> `az vm run-command` runs as `NT AUTHORITY\SYSTEM`, which is not a SQL `sysadmin` on this image. The installer grants sysadmin automatically via a brief single-user-mode restart of the local default instance. If you prefer not to restart the service, use Option A (RDP) instead, where the installer elevates the interactive `contosoadmin` login the same way.
 
 Both methods run the three SQL files in order and leave `ContosoSales` and `ContosoArchive` ready to inspect. Verify from the VM:
 

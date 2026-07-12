@@ -62,6 +62,13 @@ if ($null -eq $plainPassword -or $plainPassword.Length -lt 12) {
 }
 
 Write-Host "Ensuring resource group '$ResourceGroup' exists in '$Location' (an empty group is created if missing)."
+# A resource group's location is immutable. If one already exists in a different region (for example
+# an empty group left by an earlier what-if in westeurope), az group create silently no-ops and the
+# deployment would target the wrong region. Detect and stop with clear guidance instead.
+$existingLocation = az group show --name $ResourceGroup --query location -o tsv 2>$null
+if ($existingLocation -and ($existingLocation -ne $Location)) {
+    throw "Resource group '$ResourceGroup' already exists in '$existingLocation', but you requested '$Location'. A resource group's region cannot be changed. Delete the existing group first (az group delete --name $ResourceGroup --yes) and re-run, or re-run without -Location to reuse '$existingLocation'."
+}
 az group create --name $ResourceGroup --location $Location --only-show-errors | Out-Null
 
 $deployParams = @(

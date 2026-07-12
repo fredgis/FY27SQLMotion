@@ -52,7 +52,7 @@ The advisor skill encodes this directly: FILESTREAM (and FileTable, PolyBase, DT
 ```mermaid
 flowchart LR
     subgraph SRC["Source · rg-hvesql-demo · West Europe (default)"]
-        SVM["SQL Server 2016 SP2 (Standard)\nWindows Server 2016 VM\nContosoSales + ContosoArchive (~90 GB)\nFILESTREAM · xp_cmdshell · CLR · Service Broker\nSQL Agent · Database Mail · linked server · TDE"]
+        SVM["SQL Server 2016 SP2 (Developer edition, emulating Standard)\nWindows Server 2016 VM\nContosoSales + ContosoArchive (~90 GB)\nService Broker · xp_cmdshell · SQL Agent · Database Mail (created)\nFILESTREAM · CLR · linked server · TDE (declared inventory)"]
     end
     subgraph TGT["Target · rg-hvesql-target-frc · France Central"]
         TVM["SQL Server on Azure VM\nWindows Server 2022 · Developer/Standard edition\nOS disk + separate Premium SSD data disk\nAll legacy features preserved · AHB + free ESU"]
@@ -96,7 +96,7 @@ You need, on your machine:
 Clone the repository to a **local, non-synced path** (see the note above) and move into the lab folder:
 
 ```powershell
-git clone https://github.com/fredgis/FY27SQLMotion.git C:\labs\FY27SQLMotion
+git clone -b flthibau/hve-sql-lab https://github.com/flthibau/FY27SQLMotion.git C:\labs\FY27SQLMotion
 cd C:\labs\FY27SQLMotion\lab
 ```
 
@@ -157,6 +157,8 @@ The script asks you to type `DEPLOY` to confirm. It provisions a Windows Server 
 
 > [!NOTE]
 > **No capacity in West Europe?** The source deploys to `westeurope` by default. If the preview or deploy reports `SkuNotAvailable`, that region has no `Standard_D2s_v3` capacity for your subscription, so re-run with another EU region, for example `-Location francecentral` (or `northeurope`, `swedencentral`). The resource group is named `rg-hvesql-demo` with no region baked into the name, so every later command (IP lookup, deallocate, delete) stays the same. Find a region that has the size with `az vm list-skus --size Standard_D2s_v3 --resource-type virtualMachines --query "[].locations[0]" -o tsv`.
+>
+> **Already ran the preview once?** A what-if creates the empty resource group in whatever `-Location` it used (the `westeurope` default the first time). A resource group's region is immutable, so re-running with a different `-Location` fails with `InvalidResourceGroupLocation`. Delete the empty group first, then re-run with the new region: `az group delete --name rg-hvesql-demo --yes`.
 
 ### 1.4 Install the ContosoSales database
 
@@ -184,7 +186,7 @@ cd C:\lab-source
 .\scripts\Install-LegacyDatabase.ps1 -ServerInstance "localhost"
 ```
 
-The VM administrator is a SQL `sysadmin` on the marketplace image, so Windows authentication works and `sqlcmd` is already present. The installer runs the three SQL scripts in order and leaves `ContosoSales` and `ContosoArchive` ready to inspect. Verify from the VM:
+The installer runs the three SQL scripts in order and leaves `ContosoSales` and `ContosoArchive` ready to inspect. `sqlcmd` is already present on the image. Note that the SQL Server 2016 marketplace image grants the `sysadmin` role only to the built-in `sa` login, **not** to the VM administrator, so a plain Windows-authentication install would otherwise fail with `CREATE DATABASE permission denied`. `Install-LegacyDatabase.ps1` handles this for you: it detects that the current login is not a sysadmin and grants it the role (via a brief single-user-mode restart of the local default instance) before running the scripts. Pass `-SkipSysadminElevation` to opt out, or connect as `sa` with `-SqlUsername sa -SqlPassword <...>`. Verify from the VM:
 
 ```powershell
 sqlcmd -S localhost -E -Q "SELECT name FROM sys.databases WHERE name LIKE 'Contoso%'"
@@ -433,7 +435,7 @@ To rerun the squad cleanly, discard the generated planning artifacts under `.cop
 
 ## Troubleshooting and FAQ
 
-* **The advisor recommended Managed Instance, not VM.** It was probably not given the FILESTREAM and `xp_cmdshell` dependencies, or it was told to remediate them. Re-run Module 2.2 and make sure the request points at `legacy-inventory.md` and `source-env/sql`, where those dependencies live.
+* **The advisor recommended Managed Instance, not VM.** The `FILESTREAM` and `xp_cmdshell` dependencies were not captured during the live interview (or the advisor was told to remediate them). Re-run Module 2.2 and answer the interview yourself from the Module 3 cheat-sheet — in particular Q5 (management model → **need OS / file-system / engine control**) and Q6 (feature dependencies → **FILESTREAM**, CLR, cross-DB, linked servers, SQL Agent, Service Broker). Do **not** hand the advisor `knowledge-docs/` or `source-env/sql`; the whole point of the interview is that you state those dependencies, and `FILESTREAM` is what eliminates SQL Database and Managed Instance.
 * **"Why not Managed Instance?"** Because FILESTREAM and `xp_cmdshell` are unsupported there, and remediating them is application rework the constraints put out of scope. See the comparison table above.
 * **The source deploy reports `SkuNotAvailable` or a capacity error.** West Europe has no `Standard_D2s_v3` capacity for your subscription, so re-run the deploy with another EU region, for example `-Location francecentral`; the `rg-hvesql-demo` name has no region baked in, so nothing else changes. The what-if target uses France Central for the same reason.
 * **The squad tried to deploy.** It should not. If a role proposes an apply, the Impactful-Action Gate must stop it for your approval. Decline, and report it, that pause is the product.
