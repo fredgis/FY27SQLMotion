@@ -1,5 +1,9 @@
 # FY27 SQL Motion
 
+<p align="center">
+  <img alt="FY27 EMEA EPS — Data Motion — two paths to Azure SQL, enabled through SQL in a Day" src="images/fy27-sql-motion-hero.png" width="100%">
+</p>
+
 This repo is the **SQL motion** for FY27. It follows the shared motion template:
 a README with the strategy, a one-slide executive summary, supporting docs, build
 scripts, and the bundled slide generator.
