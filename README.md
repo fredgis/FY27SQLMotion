@@ -92,15 +92,16 @@ On top of it ships **`sql-migration-advisor`**, a
 [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/use-copilot-agents/use-copilot-cli)
 **skill** — the conversational
 front-end to that knowledge base. Ask Copilot *"migrate a SQL Server environment to Azure"*: it
-runs a short ~10-question interview, then returns a grounded recommendation — **target · method ·
+runs a short ~13-question interview, then returns a grounded recommendation — **target · method ·
 downtime class · blockers + remediations · cost levers · Microsoft program** — and never
 recommends retired tooling.
 
-**The ~10-question interview** — asked one at a time, multiple-choice, in the user's language — covers:
+**The ~13-question interview** — asked one at a time, multiple-choice, in the user's language — covers:
 
 - **Scope** — single database, a few (2–10), or a large estate (10+ servers/DBs)
 - **Source location** — on-prem, AWS EC2 / RDS for SQL Server, GCP Compute Engine / Cloud SQL
 - **Source version** — SQL Server 2008 → 2025 (drives the hard version gates for each method)
+- **Migration intent / readiness** — migrate now, modernize in place / not ready, or assess only — a customer who is not ready to move gets Azure Arc as a control plane, not a "no"
 - **Primary driver** — end-of-support / ESU, cost, app modernization, data-center exit, analytics, or sovereignty
 - **Management model** — fully-managed PaaS, OS / engine control, or Kubernetes / edge / multi-cloud
 - **Feature dependencies** — FILESTREAM, PolyBase, cross-DB / DTC, SQL CLR, linked servers, SQL Agent, Service Broker
@@ -113,6 +114,10 @@ recommends retired tooling.
 
 > 📦 **Now in its own repo.** The knowledge base, the skill and its PDF live in a dedicated
 > repository — **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-migration-advisor)**.
+> That is also where *verified* stops being a claim: every recommendation is replayed through a
+> deterministic engine against **78 golden scenarios** on every push, **15 CI gates** check the rules
+> against their own constants and forbid corrected errors from reappearing, and a **weekly review**
+> re-checks the sourced claims against Microsoft Learn and opens a PR or an issue when something moved.
 
 [![sql-migration-advisor recommendation card](https://raw.githubusercontent.com/fredgis/sql-migration-advisor/main/docs/preview/sql-migration-advisor-skill.png)](https://github.com/fredgis/sql-migration-advisor)
 
@@ -142,7 +147,7 @@ the skill in **[`fredgis/sql-migration-advisor`](https://github.com/fredgis/sql-
 
 [![SQL → Azure migration knowledge base — PDF preview](https://raw.githubusercontent.com/fredgis/sql-migration-advisor/main/docs/preview/sql-migration-advisor-pdf-preview.png)](https://github.com/fredgis/sql-migration-advisor/blob/main/docs/sql-server-to-azure-migration.pdf)
 
-What's inside (~18 pages, **v1.2 · July 2026**):
+What's inside (23 pages, **v1.12 · August 2026**):
 
 - A branded cover + table of contents, then the full **targets / control planes / methods**
   taxonomy with colored Mermaid decision diagrams.
