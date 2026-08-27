@@ -91,7 +91,7 @@ copilot   # start a GitHub Copilot CLI session in this folder
 > [!NOTE]
 > **Do you actually need this clone?** Yes — but only this one. The two *engines* are plugins (below), so you do **not** clone `hve-core` or `sql-migration-advisor`. You clone the lab because it is your **working directory and your scenario**:
 > * `knowledge-docs/` holds the ContosoSales facts — the "answer key" you read from during the interview (and, per the note in Module 2, deliberately do **not** hand to the advisor).
-> * `target-env/` and `.copilot-tracking/` are where the migration artifacts and RPI phase files land.
+> * `target-env/` is where the advisor's artifacts land (cwd-relative, under `lab/`). RPI's `.copilot-tracking/` lands at the **git repo root** (one level up from `lab/`) — see the note in Module 4.
 > * `source-env/` is the optional Track B source deployment.
 > * In the **CLI**, path-specific instructions are auto-applied only from **this repo's** `.github/instructions/` (see [§0.5](#05-optional-but-recommended-enable-applyto-instructions-in-the-cli)) — a plugin cannot auto-apply them for you.
 >
@@ -188,7 +188,7 @@ one question at a time, don't assume the answers, then give me the recommended m
 | 5 | Management model | **Need OS / file-system / engine control** | `xp_cmdshell` and FILESTREAM need the OS → biases VM |
 | 6 | Instance feature dependencies | **FILESTREAM**, CLR, cross-DB, linked servers, SQL Agent, Service Broker | FILESTREAM **eliminates SQL DB and SQL MI** |
 | 7 | Largest database size | ~90 GB (150 GB band) | Comfortable for native backup/restore |
-| 8 | Downtime tolerance | Minimal — a single weekend window | An offline-to-minimal method is acceptable |
+| 8 | Downtime tolerance | **OFFLINE — a single planned weekend maintenance window (hours, not minutes)** | Selects an **OFFLINE** cutover class → **native backup/restore**. ⚠️ If you answer just "minimal", the advisor may read it as minutes and pick **log shipping** instead — see the note below |
 | 9 | Network and ports | Standard WAN, can open outbound | Backup copy over the network is viable |
 | 10 | Compliance / sovereignty | EU data boundary | Target stays in an EU region |
 | 11 | Ancillary services | Many SQL Agent jobs, TDE-encrypted DBs | TDE cert-first; SQL Agent runs native on the target |
@@ -196,13 +196,16 @@ one question at a time, don't assume the answers, then give me the recommended m
 Applying the advisor's deterministic scoring — feature dependencies first, then management model, size, downtime, and sovereignty — produces this card:
 
 > **Verdict — `ContosoSales`**
-> **`SQL Server on Azure VM`** via **`native backup/restore`** · downtime **`minimal`** · grounded in the FY27 SQL knowledge base.
+> **`SQL Server on Azure VM`** via **`native backup/restore`** · downtime **`OFFLINE`** · grounded in the FY27 SQL knowledge base.
 
 * **🎯 Target** — SQL Server on Azure VM (Windows Server 2022, Developer or Standard edition), because FILESTREAM + `xp_cmdshell` + "need OS control" eliminate SQL DB and SQL MI.
 * **🔁 Method** — native backup/restore (full + differential + tail-log); Azure Migrate for discovery and dependency mapping.
-* **⏱️ Downtime** — minimal, a single controlled weekend cutover.
+* **⏱️ Downtime** — OFFLINE, a single controlled weekend cutover.
 * **🚧 Blockers become cutover steps** — TDE server certificate (restore it to the target **before** the encrypted databases); the ERP linked server (re-establish the private path, recreate the definition); Database Mail (point at a reachable SMTP relay, allow outbound 587); `xp_cmdshell`/FILESTREAM/CLR/Service Broker/SQL Agent all **preserved on the VM, no rework** — the reason VM beats a managed target here.
 * **💰 Cost/program** — AHB eligible for Windows + SQL via Software Assurance; **ESU free on Azure VM**; size from ≥7 days of Perfmon + ~20% headroom, never from average CPU.
+
+> [!IMPORTANT]
+> **Why the downtime answer must say "OFFLINE" (question 8).** The advisor scores the *method* partly from the downtime class. If you answer question 8 with just "minimal", the advisor can read it as a *minutes-level* cutover and recommend **log shipping** as the primary method (native backup/restore drops to the alternative). The target stays `SQL Server on Azure VM` either way, but to reproduce the card above — and the rest of this lab, whose Module 4 prompt is written around native backup/restore — answer question 8 as an **OFFLINE weekend maintenance window measured in hours, not minutes**. This is a genuine ambiguity in how "minimal" is worded, not a bug: state the cutover class explicitly.
 
 The skill emits this result as a **migration path object** conforming to `skills/recommend-migration-path/schemas/output.schema.json`. In the current v3.1 schema the object's top-level keys are `metadata`, `normalizedProfile`, `eligibilityTrace` (every candidate target with a rule id and reason), `recommendation`, `alternative`, `methodCandidates`, `methodGateTrace`, `blockers`, `unknowns`, `assumptions`, `evidenceRequired`, `nextActions`, `evidenceLinks`, and `largestRisk` — with the downtime class carried as `normalizedProfile.downtime` (here `OFFLINE`).
 
@@ -277,6 +280,11 @@ What happens, and why it is the point:
 * `/rpi-research` reads `prerequisite-plan.md` **by path** (not a summary). Each `❌ missing` / `❓ unknown` prerequisite becomes an investigation item; each `✅ confirmed` becomes a grounded assumption. The brain's confidence markers become RPI's research priorities.
 * It writes a dated primary research artifact under `.copilot-tracking/research/<YYYY-MM-DD>/<task-slug>-research.md` (the path is fixed by hve-core's `copilot-tracking` conventions).
 
+> [!NOTE]
+> **Where `.copilot-tracking/` actually lands.** The CLI treats the **git repository root** as the workspace, so `.copilot-tracking/` is created at the repo root — i.e. one level **above** the `lab/` folder you `cd`'d into (at `C:\labs\FY27SQLMotion\.copilot-tracking\`, not `lab\.copilot-tracking\`). This is a split from the advisor's `target-env/`, which is created relative to your current directory under `lab/`. Two practical consequences:
+> * **The chain still works automatically** — the RPI phases resolve each other's artifacts against the workspace root, so `/rpi-plan`, `/rpi-implement`, and `/rpi-review` find the files even though the paths in the prompts below look `lab/`-relative.
+> * **To open the files yourself**, look under the **repo root** `.copilot-tracking/`, not under `lab/`. If you'd rather keep everything in one place, run the whole lab from the repo root (`cd C:\labs\FY27SQLMotion`) instead of `lab/`, and prefix the advisor paths with `lab/` (e.g. `lab/target-env/prerequisite-plan.md`).
+
 > [!IMPORTANT]
 > **★ Glue (hand-off #4 — THE SEAM) ★** Producer: the brain (`prerequisite-plan.md`) · Consumer: `/rpi-research` · Artifact carried forward: `.copilot-tracking/research/<date>/<slug>-research.md`. **The seam in one sentence:** the brain's `prerequisite-plan.md` *is* RPI's research input. You did not re-describe the migration to RPI — you handed it a validated file, and RPI investigated against it. The plan's structure (owners, evidence, blocking flags) is precisely the shape RPI needs to plan work.
 
@@ -318,6 +326,9 @@ logins/jobs/linked-server steps. Do NOT deploy — what-if only if az is availab
 ```
 
 On Track A, "implement" means **authoring** the artifacts the plan calls for — the target Bicep, the cutover runbook, the scripted logins/jobs/linked-server steps — and, if you did Track B and have `az`, running a **`what-if` only**. It does not deploy. `/rpi-implement` records what it did under `.copilot-tracking/changes/<date>/<slug>-changes.md`.
+
+> [!NOTE]
+> **`Stop after each phase` — expect it to pause (interactive) or stop (scripted).** With `Stop after each phase` in the prompt, `/rpi-implement` completes **one phase at a time** and waits for your go-ahead — by design, so you can review each phase. In an **interactive** session you simply reply "continue" to proceed to the next phase. In a **scripted / `copilot -p`** run there is no way to say "continue", so a single call authors only the **first** phase (typically a discovery/inventory pass) and stops. To author the whole set in one scripted pass, **drop `Stop after each phase`** from the prompt (or re-invoke `/rpi-implement` once per phase to continue). Either way the final artifact set is identical.
 
 > **★ Glue (hand-off #6) ★** Producer: `/rpi-implement` · Artifact: `.copilot-tracking/changes/<date>/<slug>-changes.md` (plus the authored files in `target-env/`) · Contract: `rpi-implement/templates/changes-log.md` · Consumer: `/rpi-review`.
 
