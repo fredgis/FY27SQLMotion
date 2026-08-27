@@ -221,6 +221,8 @@ The skill emits this result as a **migration path object** conforming to `skills
 >
 > **Producer:** `/recommend-migration-path` · **Artifact:** `target-env/migration-path.json` · **Contract:** `recommend-migration-path/schemas/output.schema.json` · **Consumer:** `/generate-migration-prerequisite-plan` (Module 3). A schema-validated file can be checked; a hand-off that lives only in the conversation cannot.
 
+📄 **What you get from Module 2 — `target-env/migration-path.json`.** A machine-readable *decision record*: the recommended **target** and **method**, the **downtime class**, the full **eligibility trace** (why each candidate target was kept or ruled out), the **method candidates**, **blockers**, **unknowns**, **evidence still required**, and the **cost/funding levers**. It is not a design and not code — it is the sourced verdict the next skill turns into a checklist. Keep it; Module 3 reads it by path.
+
 ---
 
 ## Module 3 — Brain, skill 2: turn the path into a prerequisite plan (Track A · ~10 min · $0)
@@ -255,6 +257,8 @@ Append the connectivity matrix to target-env/prerequisite-plan.md.
 > **#2** — Producer: `/generate-migration-prerequisite-plan` · Artifact: `target-env/prerequisite-plan.md` · Contract: that skill's `schemas/output.schema.json` + `templates/prerequisite-plan.md` · Consumer: `/rpi-research` (Module 4).
 > **#3** — Producer: `/get-connection-details` · Artifact: the connectivity matrix appended into `prerequisite-plan.md` · Contract: `get-connection-details/reference/connectivity-matrix.json` · Consumer: `/rpi-research`.
 
+📄 **What you get from Module 3 — `target-env/prerequisite-plan.md`.** The *readiness checklist* — the partner-facing deliverable. It carries an overall verdict (e.g. `unknown_requires_assessment`), a readiness summary by area, and a **prerequisites table** where every requirement has a **status**, whether it **blocks**, an **owner**, the **evidence required**, and an **official source** — followed by **blocking actions** and **remaining unknowns**. This is the polished Markdown you can export to a PDF and hand to the customer, and it is the exact artifact RPI executes against next. (If you ran `/get-connection-details`, a connectivity matrix — ports, private paths, TDE-cert order — is appended to the same file.)
+
 > [!NOTE]
 > Notice what the brain **never** does: it never authors Bicep, never runs a backup, never deploys. Every prerequisite carries an **owner**, **evidence required**, and a **status** — deliberately the vocabulary of an *executable plan*, not a design. The brain has produced a **plan of record**. Executing it is RPI's job.
 
@@ -288,6 +292,8 @@ What happens, and why it is the point:
 > [!IMPORTANT]
 > **★ Glue (hand-off #4 — THE SEAM) ★** Producer: the brain (`prerequisite-plan.md`) · Consumer: `/rpi-research` · Artifact carried forward: `.copilot-tracking/research/<date>/<slug>-research.md`. **The seam in one sentence:** the brain's `prerequisite-plan.md` *is* RPI's research input. You did not re-describe the migration to RPI — you handed it a validated file, and RPI investigated against it. The plan's structure (owners, evidence, blocking flags) is precisely the shape RPI needs to plan work.
 
+📄 **What you get from Module 4 — a dated research doc** under `.copilot-tracking/research/<date>/<slug>-research.md`. It is RPI's *grounded evidence file*: every `❓ unknown` / `❌ missing` prerequisite becomes a named **investigation item**, every `✅ confirmed` one becomes a **grounded assumption**, each with citations (Microsoft Learn plus, where relevant, the repo's own `knowledge-docs/`). You don't ship this — it is the verified basis the plan is built from, and the reason the plan can be trusted.
+
 > [!TIP]
 > Between phases, run `/clear`. RPI phases carry context through their **artifacts**, not through chat history — that is the whole reason the files exist. A cleared context that reads the research file is more reliable than a long context that "remembers" it.
 
@@ -314,6 +320,8 @@ Create the implementation plan from the research in
 
 > **★ Glue (hand-off #5) ★** Producer: `/rpi-plan` · Artifact: `.copilot-tracking/plans/<date>/<slug>-plan.md` (+ `details/…-phase-details.md`) · Contract: `rpi-plan/templates/implementation-plan.md` · Consumer: `/rpi-implement`.
 
+📄 **What you get from Module 5.1 — the executable plan.** Under `.copilot-tracking/plans/<date>/<slug>-plan.md` you get the *sequenced task graph*: the migration broken into phases (P01…Pnn) and tasks with a fixed order, plus `details/…-phase-details.md` (the per-task evidence and acceptance criteria) and `reviews/plans/…-plan-critique.md` (the record of the self-critique that hardened it). This is not a checklist any more — it is the ordered set of steps `/rpi-implement` will turn into real files.
+
 ### 5.2 Implement (authoring, not deploying)
 
 ```text
@@ -326,6 +334,18 @@ logins/jobs/linked-server steps. Do NOT deploy — what-if only if az is availab
 ```
 
 On Track A, "implement" means **authoring** the artifacts the plan calls for — the target Bicep, the cutover runbook, the scripted logins/jobs/linked-server steps — and, if you did Track B and have `az`, running a **`what-if` only**. It does not deploy. `/rpi-implement` records what it did under `.copilot-tracking/changes/<date>/<slug>-changes.md`.
+
+📄 **What you get from Module 5.2 — your migration package.** This is the module that produces the most, and it is the deliverable a migration team actually uses. Everything lands under `lab/target-env/`, **authored only — nothing is deployed**. A real Track A run of this lab produced the set below; the exact filenames and folder split vary from run to run, but the **categories are stable**:
+
+| Under `target-env/` | What it is | What you do with it |
+| --- | --- | --- |
+| **`infra/bicep/`** — `main.bicep` + `main.bicepparam` + `modules/{network,storage,sql-vm}.bicep` | The **target landing zone as code**: private VNet, NSG that keeps port 1433 off the internet, the SQL VM with dedicated data/log + FILESTREAM disks, and storage for Backup-to-URL. Validated with `az bicep build`. | Review it; on migration day, `what-if` → approve → deploy to stand up the target. |
+| **`runbooks/cutover-runbook.md`** | The **master cutover runbook** — the single ordered entry point: pre-flight → freeze apps → archive DB → primary DB → metadata/app cutover → go/no-go. The order is **locked** (TDE cert + FILESTREAM before any restore; archive before primary; metadata after recovery). | The procedure the DBA follows during the migration weekend. |
+| **`runbooks/NN-*.md`** (per phase) + **`runbooks/rollback-runbook.md`** | The **detailed procedure** behind each cutover step, and the **rollback** (last reversible point, decision deadline, owner). | Followed step-by-step during cutover; rollback if go/no-go says no-go. |
+| **`scripts/*.sql`** — TDE cert import, FILESTREAM enablement, backup/verify, transfer-path test, restore chain, recovery checks, logins/jobs, linked servers/Service Broker | The **runnable SQL/PowerShell** each runbook step calls — the concrete migration commands. | Run in the order the runbook dictates. Authored only; none are executed by the lab. |
+| **`discovery/inventory.md`** + **`governance/`** (RPO/RTO agreement, application-cutover plan, validation plan, evidence register) | The **evidence & sign-off scaffolding**: what was inventoried, the agreed downtime/RPO/RTO, the validation checklist, and the register that ties every open item to an owner. | Fill in as facts are confirmed; the evidence register is your audit trail. |
+
+`/rpi-implement` also updates `.copilot-tracking/changes/<date>/<slug>-changes.md` — a **per-phase record of what it authored** (the evidence `/rpi-review` checks next). If you ran with `Stop after each phase`, this file grows one phase at a time.
 
 > [!NOTE]
 > **`Stop after each phase` — expect it to pause (interactive) or stop (scripted).** With `Stop after each phase` in the prompt, `/rpi-implement` completes **one phase at a time** and waits for your go-ahead — by design, so you can review each phase. In an **interactive** session you simply reply "continue" to proceed to the next phase. In a **scripted / `copilot -p`** run there is no way to say "continue", so a single call authors only the **first** phase (typically a discovery/inventory pass) and stops. To author the whole set in one scripted pass, **drop `Stop after each phase`** from the prompt (or re-invoke `/rpi-implement` once per phase to continue). Either way the final artifact set is identical.
@@ -349,6 +369,8 @@ against the plan and the inherited constraints from the prerequisite plan.
 
 > **★ Glue (hand-off #7) ★** Producer: `/rpi-review` · Artifact: `.copilot-tracking/reviews/logs/<date>/<slug>-review.md` · Contract: `rpi-review/templates/review-log.md` · Consumer: you (and any follow-up items routed back to research/plan).
 
+📄 **What you get from Module 5.3 — the review log** under `.copilot-tracking/reviews/logs/<date>/<slug>-review.md`. It records the **outcome** (`Conformant` or an escalation), the **constraint checks** it ran (cert-before-restore, 1433 never open to the internet, feature parity), and any **severity-tagged findings** with where they were found. It is your evidence that the package in `target-env/` is safe to hand on — a real run independently re-runs `az bicep build` and grep-verifies the plan's fixes in the artifacts, not just the plan's self-report.
+
 ---
 
 ## Module 6 — One-line coordinated variant
@@ -367,6 +389,40 @@ anything that spends money.
 *(VS Code equivalent: pick **RPI Agent** from the agent picker, or run `/rpi task="…"`. There is also a single coordinating skill, `/rpi-quick`, that sequences all phases in one call — a lighter alternative to switching into the agent.)*
 
 The **RPI Agent** coordinates `rpi-research → rpi-plan → rpi-implement → rpi-review` itself, persisting every artifact under `.copilot-tracking/`, and stops at implementation for your approval before anything impactful. If review finds the TDE-cert order unaddressed, it escalates instead of finishing. The phase-by-phase version in Modules 4–5 and this one produce the **same artifact chain** — the only difference is who advances the phases, you or the agent.
+
+---
+
+## What the lab produces — your deliverables
+
+By the end you have two distinct kinds of output. Keeping them apart is the key to reading the results:
+
+### A · The migration package — what you hand to the migration team
+
+Real, human-usable deliverables under **`lab/target-env/`**. This is the point of the whole lab. **Nothing here is deployed by the lab** — it is authored, reviewed, and ready to execute on migration day.
+
+| Path (under `lab/target-env/`) | Deliverable | Status |
+| --- | --- | --- |
+| `migration-path.json` | the **decision** — target · method · downtime class · eligibility trace · funding levers | reference |
+| `prerequisite-plan.md` | the **readiness checklist** — 17 prerequisites with owner/evidence/status; partner-ready, PDF-exportable | reference |
+| `infra/bicep/` | the **target landing zone as code** (compiles with `az bicep build`) | deployable — *not deployed* |
+| `runbooks/cutover-runbook.md` | the **master cutover procedure** (locked order) | execute on migration day |
+| `runbooks/NN-*.md` + `runbooks/rollback-runbook.md` | **per-phase procedures** + **rollback** | execute / fallback |
+| `scripts/*.sql` | the **runnable migration commands** | run per the runbook |
+| `discovery/` + `governance/` | **inventory, RPO/RTO, validation plan, evidence register** | fill in + audit trail |
+
+### B · The RPI working record — how the package was built, and why
+
+The tracking trail under the **repo root** `.copilot-tracking/` (see the [Module 4 note](#module-4--the-seam-hand-the-plan-to-rpi-track-a--5-min--0) on location). You don't ship these — they are the **auditable reasoning** behind folder A, phase by phase.
+
+| Path (under `<repo-root>/.copilot-tracking/`) | What it records |
+| --- | --- |
+| `research/…-research.md` | the grounded evidence and per-prerequisite disposition |
+| `plans/…-plan.md` + `details/…` | the sequenced task graph |
+| `reviews/plans/…-plan-critique.md` | the self-critique that hardened the plan |
+| `changes/…-changes.md` | the per-phase record of what implement authored |
+| `reviews/logs/…-review.md` | the final review verdict |
+
+**The one-line takeaway:** the lab turns a blind estate into a **reviewed, deployable migration package** (folder A) with a **full auditable trail of how it got there** (folder B). On migration day, a human deploys and executes folder A — the lab is the rehearsal.
 
 ---
 
