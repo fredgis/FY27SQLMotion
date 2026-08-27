@@ -6,6 +6,14 @@ ms.date: 2026-08-27
 ms.topic: how-to
 ---
 
+## Watch the walkthrough (~4 min)
+
+<video src="https://github.com/user-attachments/assets/d74052bc-a256-4957-b595-41df2a78cd6c" poster="images/hve-core-sql-lab-demo-poster.jpg" controls muted></video>
+
+A narrated four-minute tour of the whole lab: what the **SQL Migration Advisor** and **HVE Core** each are and how they fit, the interview → migration path → prerequisite plan, the **seam** into RPI, the plan's **self-critique** catching the TDE-certificate order, and the **authoring-only** implement plus a **Conformant** review. If the player does not load, [download the MP4](https://github.com/user-attachments/assets/d74052bc-a256-4957-b595-41df2a78cd6c).
+
+---
+
 ## What this lab is
 
 This is the **pure hve-core** rewrite of [the VM-to-VM squad lab](./04-lab-vm-to-vm.md). Same story, same `ContosoSales` workload, same target — but the orchestration layer is gone and the install is **two native GitHub Copilot plugins**. There is **no HVE Squad** and **no APM** anywhere. You install the intelligence with `/plugin`, then call its skills in order.
