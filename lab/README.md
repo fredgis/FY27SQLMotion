@@ -11,6 +11,7 @@ durable memory).
 
 **[docs/04-lab-vm-to-vm.md](docs/04-lab-vm-to-vm.md)** — the full guided lab,
 Module 0 through Module 7.
+**[docs/05-lab-core-rpi.md](docs/05-lab-core-rpi.md)** — Guided lab: migrate ContosoSales with the SQL Migration Advisor plugin + HVE Core RPI — two Copilot plugins, no squad, no APM
 
 ## Prerequisites (quick view)
 
