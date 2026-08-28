@@ -26,6 +26,9 @@ The two building blocks — both installed as GitHub Copilot plugins:
 **The one idea this lab exists to show:** the brain decides *what* to migrate and *how*; RPI disciplines *how you execute* it — and **every hand-off between the two, and between every RPI phase, is a file, not a conversation.** That file chain is "the glue," and this lab makes it visible at every hop.
 
 > [!NOTE]
+> **The advisor is the origin of the whole motion — not a pre-step.** The SQL Migration Advisor's own [roadmap](https://github.com/fredgis/sql-migration-advisor/blob/main/howto/how-the-skill-works.md#8-roadmap--from-an-advisor-to-a-migration-platform) is three building blocks: **Advisor (shipped)** → **Assessment (planned)** → **Migration (planned)**, all intended to be contributed to HVE Core. This lab is that roadmap *realized*: the shipped **advisor decides** (Modules 2–3), then HVE Core RPI supplies the two planned blocks — **assessment** (`/rpi-research` verifies the estate) and **migration** (`/rpi-implement` + `/rpi-review` execute and check). So the advisor is not "the thing you run before the real lab" — it is the **brain that sets the target, the method, the funding, and the readiness contract** that everything downstream obeys. Modules 2–3 are where that intelligence lives; give them the attention they deserve.
+
+> [!NOTE]
 > **Why do this instead of the squad lab?** To see the framework with the orchestration layer removed. In the squad lab a coordinator routes the SQL cue, runs the council, and holds the gates for you. Here **you are the coordinator**: you install two plugins, call the skills in order, and carry each artifact forward by hand. It is more manual — and that is the point. The path, the plan, the RPI phases, and the files that connect them are all in the open. It also runs on `hve-core` + one small plugin, without the ~290-dependency squad.
 
 > [!NOTE]
@@ -37,6 +40,7 @@ By the end you will be able to:
 
 * Install HVE Core **and** the migration brain as **two GitHub Copilot plugins** — no APM, no squad.
 * Run the Advisor interview yourself and produce a **migration path** and a **prerequisite plan** as durable artifacts.
+* **Read the advisor's decision** — walk the A → B → C → D pipeline (eligibility → method → confidence → funding) and defend *why* it chose the target, the method, and the cost levers.
 * Hand that plan to HVE Core **RPI** as research-ready input and drive `/rpi-research → /rpi-plan → /rpi-implement → /rpi-review`.
 * **Name every seam in the chain** — for each hand-off, say which skill produced it, which file carries it, which contract validates it, and which skill consumes it next.
 * Explain precisely where the brain stops (advisory) and where RPI takes over (execution), and why the boundary is deliberately a file.
@@ -233,6 +237,60 @@ The skill emits this result as a **migration path object** conforming to `skills
 
 ---
 
+## Deep dive — how the advisor actually decides (the A → B → C → D pipeline)
+
+This is the heart of the motion, and the part most people skip: *why* did the advisor say `SQL Server on Azure VM` via `native backup/restore` at `provisional / low`? It did not pattern-match a demo. It ran a **versioned, source-verified decision pipeline** — the same four steps every recommendation goes through, documented in the advisor's [`decision-rules.md`](https://github.com/fredgis/sql-migration-advisor/blob/main/reference/decision-rules.md). Understanding these four steps is what lets you defend a recommendation to a customer — and what makes the JSON in `migration-path.json` readable instead of magic.
+
+```mermaid
+flowchart LR
+    A["**Step A**\nEligibility filter\n→ target shortlist"] --> B["**Step B**\nRank · tier · **method**"]
+    B --> C["**Step C**\nBlockers · confidence\n· provisional contract"]
+    C --> D["**Step D**\nCost levers · program fit\n· assessment tool"]
+    D --> OUT["migration-path.json\n(the decision record)"]
+```
+
+### Step A — eligibility: rule *out*, never rule *in*
+
+First the advisor normalizes your interview answers into typed fields (`management_model`, `feature_dependencies`, `downtime`, `compliance`, `size`…), then runs **hard compatibility rules** across all eight target families (SQL VM, AVS, SQL MI, SQL DB, Fabric SQL DB, Arc SQL MI, container, Arc in-place). These are **filters, not preferences** — a rule can only mark a target `eligible`, `unsupported`, or `unknown_requires_assessment`; it can never promote one.
+
+For ContosoSales, one rule does the heavy lifting: **`FILESTREAM-PAAS`**. FILESTREAM/FileTable is a *hard* incompatibility on SQL MI and SQL DB (and even on the Linux container), but `eligible` on SQL VM and AVS. Combined with the `management_model = need OS/engine control` answer, that eliminates every managed target in one pass — which is exactly what the `eligibilityTrace` array in your JSON records, rule id and reason per target. The lesson to carry to a customer: **the target wasn't chosen because VM is nice; it was the only family left standing after the dependencies filtered the rest out.**
+
+### Step B — ranking, tier, and method: a comparison, not a lookup
+
+Among the *surviving* targets, Step B ranks, picks a tier, and — the part that bit us on the first playthrough — **picks the migration method**. Method selection is deliberately a **comparison**, run in three moves (`B3.0`):
+
+1. **Enumerate** every method the knowledge base marks supported for the chosen target (backup/restore, log shipping, DMS, Always On/DAG, transactional replication, BACPAC…).
+2. **Apply the hard gates** — source-version floor, ports, permissions, capacity, and the **downtime class**. A gate can only *remove* a candidate or hold it at `unknown_requires_assessment`.
+3. **Rank what survives**, in order: (1) meet the stated **downtime tolerance**, (2) follow what the answers actually say (DB count, size, network, permissions), (3) prefer the simpler operation.
+
+This is why interview question 8 matters so much (see the note above): answer `OFFLINE` and step 1 keeps native backup/restore; answer a minutes-level "minimal" and the same step promotes **log shipping** instead. The `methodCandidates` and `methodGateTrace` arrays in your JSON are this comparison, frozen — every method it considered, and why each stands or falls. **A method that is never considered cannot be argued with**; the advisor's discipline is to always list the alternatives.
+
+### Step C — blockers, confidence, and the "it never lies" contract
+
+Step C turns the remaining feature dependencies into **cutover blockers with remediations** (TDE cert first, linked-server re-establishment, Database Mail relay…), then applies the **confidence contract** — the single most important thing to understand about this skill:
+
+* `recommendationStatus` is **always `provisional`**. There is no other value. The advisor reads *nothing* from the live estate, so it can never certify a target — it can only recommend one.
+* `confidence = medium` is the **ceiling**, reached only when every hard blocker and tier-driving input is known and the method gates pass. Anything higher would require *measured* evidence, and the interview produces none.
+* `confidence = low` the moment any decision-driving dependency is `unknown_requires_assessment` — and each such unknown adds an entry to `evidenceRequired`, naming the next assessment to run.
+
+That is why ContosoSales came back **`provisional / low`** with a populated `evidenceRequired` list: source OS/edition, Blob reachability, and permissions were never measured. **This honesty is the feature.** It is also the exact seam into HVE Core — the `evidenceRequired` list is the work `/rpi-research` picks up in Module 4.
+
+### Step D — the funding equation (the differentiator)
+
+Step D is where a recommendation becomes a *deal*. The advisor never emits a cost estimate (it has no sizing data), but it surfaces the **cost levers** with real, versioned nuance — this is the part to put in front of a customer:
+
+* **Azure Hybrid Benefit (AHB)** — eligible for **SQL MI, SQL VM, and SQL DB GP/BC vCore provisioned** (plus a pre-15-Dec-2023 Hyperscale exception); **not** DTU, serverless, or Fabric SQL DB. Set `ahbEligible` only for the eligible compute models.
+* **Extended Security Updates (ESU)** — now covers **SQL Server 2014 and 2016 only**. ESU is **free on Azure VM/AVS for 2014**; **2016 is paid everywhere, including Azure VM** (end of support 15 Jul 2026, ESUs to 17 Jul 2029) — which materially changes the stay-vs-migrate maths for ContosoSales. On-prem subscribes via **Azure Arc** (with Software Assurance, or Arc-connected PAYG).
+* **Sizing rule** — never size from average CPU; require ≥7 days of Perfmon/DMV baseline, peak windows, IOPS, tempdb, log generation, and ~20% headroom.
+* **Combine** AHB + reservations + ESU where eligible; state that savings depend on licence position and commitment.
+
+In the field you layer the Microsoft **funding programs** (CAF, the Azure Frontier Offer, ECIF/ACO) on top of these levers — but the advisor gives you the eligibility-accurate foundation to build that business case on, per-target and per-compute-model.
+
+> [!NOTE]
+> **Why you can trust the pipeline: the knowledge base refreshes itself.** A migration KB rots fast — tools retire, previews go GA, ESU dates move. The advisor repo keeps itself honest with a scheduled GitHub Action ([`weekly-kb-check.yml`](https://github.com/fredgis/sql-migration-advisor/blob/main/.github/workflows/weekly-kb-check.yml), Mondays 05:00 UTC): it scans links and product news, has a model on Azure AI Foundry return a JSON staleness verdict, bumps the KB version and changelog, and opens a **pull request for a human to merge**. So the rules behind your `migration-path.json` carry a **version** (`metadata.knowledgeBaseVersion` / `decisionRulesVersion`) and are reviewed weekly — the recommendation is dated and auditable, not a frozen snapshot. Run `copilot plugin update sql-migration-advisor` to pull the latest.
+
+---
+
 ## Module 3 — Brain, skill 2: turn the path into a prerequisite plan (Track A · ~10 min · $0)
 
 The second skill, `generate-migration-prerequisite-plan`, reads the path object and produces the **prerequisite plan** — the readiness checklist RPI will execute against. This is the artifact that makes the whole migration RPI-drivable.
@@ -250,6 +308,9 @@ The skill reads the path, applies its prerequisite knowledge base (`skills/gener
 * a **readiness summary** table by area,
 * a **prerequisites table** — each requirement with a status (`✅ confirmed / ❌ missing / ❓ unknown / ➖ n/a`), whether it is **blocking**, an **owner**, the **evidence required**, and an **official source**,
 * **blocking actions**, **remaining unknowns**, **inherited advisor facts/assumptions**, and **next actions**.
+
+> [!NOTE]
+> **How the plan is built — the path drives the checklist.** This skill is not generic. It reads the `recommendation` from `migration-path.json`, resolves it to a specific **path id** in its [`path-catalog.json`](https://github.com/fredgis/sql-migration-advisor/blob/main/skills/generate-migration-prerequisite-plan/reference/path-catalog.json) — for ContosoSales that is **`P04` — SQL Server on Azure VM · Native Backup/Restore** — and emits exactly that path's prerequisites, **`P04-001…P04-005`**, on top of the **common `COM-001…COM-012`** that every migration shares. Pick a different target or method in Module 2 and you get a *different* prerequisite set. It also asks **only the path-specific questions still unresolved** (it inherits everything the advisor already established), and — crucially — it **reports** readiness, it never **verifies** it: "verifying a prerequisite is the reader's job." That single design choice is what makes the file a clean hand-off to RPI, whose whole job in Module 4 is to *do* the verifying.
 
 Optionally enrich the plan with connectivity facts (ports, private paths, the TDE-cert order) from the third skill:
 
